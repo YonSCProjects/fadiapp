@@ -32,10 +32,15 @@ The Expo app has path alias `@/*` → `src/*` (see `tsconfig.json`). The worker 
 **Cloudflare Worker (run from `worker/`):**
 - `npm install`
 - `npx wrangler secret put ANTHROPIC_API_KEY` — one-time, interactive
-- `npx wrangler secret put TEACHER_JWT_SECRET` — one-time, interactive
+- `npx wrangler secret put WORKER_SHARED_SECRET` — one-time, interactive
 - `npx wrangler dev` — local dev
 - `npx wrangler deploy` — production deploy
 - `npm run typecheck`
+
+**Drizzle (schema + migrations, from repo root):**
+- Edit [src/db/schema.ts](src/db/schema.ts) for schema changes.
+- `npx drizzle-kit generate` — emits a new SQL file under `drizzle/` and updates `drizzle/migrations.js`.
+- Migrations run automatically on app boot via `useDbMigrations()` in [app/_layout.tsx](app/_layout.tsx). Never run migrations manually; commit the generated SQL.
 
 ## Architecture patterns that must be preserved
 
@@ -45,7 +50,7 @@ The Expo app has path alias `@/*` → `src/*` (see `tsconfig.json`). The worker 
 
 ### 2. RTL bootstrap runs once, before any render
 
-`src/i18n/rtl.ts` calls `I18nManager.forceRTL(true)` for `he-IL` and triggers `Updates.reloadAsync()` on Android (iOS picks it up without reload). `app/_layout.tsx` awaits this before mounting the `Stack`. Don't add screens that read `I18nManager.isRTL` at module-evaluation time — only inside component render — because the reload can momentarily desync.
+[src/i18n/rtl.ts](src/i18n/rtl.ts) calls `I18nManager.forceRTL(true)` for `he-IL`. On first install where the OS locale is LTR, the visual switch only applies after the app is closed and reopened once — we accept this rather than adding `expo-updates` just for `Updates.reloadAsync()`. Root layout awaits the bootstrap before mounting `Stack`. Don't read `I18nManager.isRTL` at module-evaluation time — only inside component render.
 
 ### 3. Two-boundary PII defense for LLM calls
 
@@ -58,7 +63,9 @@ Both must stay. The worker guard is not a substitute for the device guard — it
 
 ### 4. Worker is the only LLM caller; model list is a whitelist
 
-`worker/src/index.ts` hard-codes `ALLOWED_MODELS = {claude-opus-4-7, claude-sonnet-4-6}`. Requests with any other model return 400. The Anthropic key never leaves the worker. The mobile bundle calls only `extra.workerBaseUrl` (from `app.json`) with a per-teacher JWT bearer token.
+[worker/src/index.ts](worker/src/index.ts) hard-codes `ALLOWED_MODELS = {claude-opus-4-7, claude-sonnet-4-6}`. Requests with any other model return 400. The Anthropic key never leaves the worker.
+
+**Auth is a static shared-secret bearer for now**, not per-teacher JWTs — we're single-teacher during dev and the JWT machinery was pulling its weight backwards. The shared secret lives in `app.json extra.workerSharedSecret` on the client and as `WORKER_SHARED_SECRET` (via `wrangler secret put`) on the Worker. The plan still calls for per-teacher JWTs; revisit when multi-teacher is a real use case. `worker/src/auth.ts` (HS256 verifier) was removed; git log has it if we need to restore.
 
 ### 5. Google Drive: teacher-owned, `drive.file` scope only
 
@@ -70,11 +77,22 @@ Placeholders `REPLACE_WITH_*` in `app.json` must be set to real Google OAuth cli
 
 ## Data model
 
-The SQLite schema lives (will live) at `src/db/schema.ts`. Table design, PII classification, and sync semantics are specified in the plan file (section "Data Model"). The three rules that survive any refactor:
+The SQLite schema lives at [src/db/schema.ts](src/db/schema.ts) (12 tables: teachers, classes, students, activities, lessons, lesson_instances, attendance, post_class_reflections, pedagogical_principles_seen, knowledge_snippets, coaching_events, sync_log). Typed repos go under [src/db/repos/](src/db/repos/); start new ones by copying [teachers.ts](src/db/repos/teachers.ts). Strongly-typed enums (`PedagogicalModel`, `ActivityCategory`, etc.) and JSON blob types (`LessonBlock`, `ActualBlock`, `MedicalFlags`) are exported from the schema file — use them rather than redeclaring.
+
+Three invariants that survive any refactor:
 
 - `students.full_name_enc` and `students.medical_flags_json` are PII, encrypted, never uploaded to Drive plaintext, never sent to LLM.
 - Drive writes contain aggregate attendance counts only — never per-student names.
-- Every row has `id (ULID)`, `created_at`, `updated_at`, `deleted_at` (soft-delete), `sync_rev`.
+- Every row has `id (ULID)`, `created_at`, `updated_at`, `deleted_at` (soft-delete), `sync_rev`, `drive_etag`. Use the `timestamps` helper in `schema.ts` — don't declare these per-table.
+
+## Seed knowledge base
+
+[assets/kb/](assets/kb/) has three hand-authored JSONs:
+- `pedagogy_cards.json` — 6 models (TGfU, Sport Education, TPSR, Skill Themes, Cooperative, Mosston Spectrum) with Hebrew summaries, when-to-use hints, and citations. Used as LLM system-prompt context for the designer.
+- `safety.json` — RAMP protocol, FIFA 11+, ACSM teen HR zones, WHO/CDC youth PA guidelines. Used as lookup tables; quote verbatim, do not paraphrase via LLM.
+- `activities_seed.json` — 30 activities across warmup / skill / game / fitness / cooldown categories, Hebrew-first with English fallback, source_ref keyed.
+
+[src/kb/importer.ts](src/kb/importer.ts) upserts activities into SQLite by `source_ref` on every boot — idempotent, so editing the JSON and reloading picks up changes. Adding new activities: append to the JSON, reload the app, done. Adding new pedagogy cards or safety entries: the designer consumes them directly from the bundled JSON via `require()`; no import step needed.
 
 ## Testing posture
 
@@ -82,8 +100,7 @@ Pure logic (timer model, sanitizer, future coaching rules) gets unit tests that 
 
 ## Known placeholders and TODOs
 
-- `app.json` Google OAuth client IDs.
-- `wrangler.toml` `workerBaseUrl` / `app.json extra.workerBaseUrl` must match a real deployed worker.
-- `src/db/schema.ts` not yet written — only its location is referenced.
-- `src/llm/sanitizer.ts` (device-side) not yet written; the worker-side one exists as defense-in-depth.
+- `app.json extra.workerBaseUrl` and `workerSharedSecret` are placeholders until the Worker is deployed.
+- `src/llm/sanitizer.ts` (device-side) not yet written; the Worker-side one exists as defense-in-depth only.
+- `expo-av` was dropped in the SDK 55 upgrade; add `expo-audio` (its replacement) when we wire up timer audio cues in the runner polish phase.
 - `settings.json` at repo root was not created by us; leave it alone unless the user asks.
