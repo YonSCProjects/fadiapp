@@ -1,0 +1,21 @@
+name = "fadiapp-worker"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ANTHROPIC_DESIGN_MODEL = "claude-opus-4-7"
+ANTHROPIC_CHAT_MODEL = "claude-sonnet-4-6"
+
+# Secrets (set via `wrangler secret put`):
+#   ANTHROPIC_API_KEY   — server-side Anthropic API key
+#   TEACHER_JWT_SECRET  — HS256 secret for per-teacher JWTs
+
+# [[d1_databases]]   # later: RAG corpus
+# binding = "RAG_DB"
+# database_name = "fadiapp-rag"
+# database_id = "..."
+
+# [[vectorize]]      # later: embeddings index
+# binding = "RAG_INDEX"
+# index_name = "fadiapp-curriculum"

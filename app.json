@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "FadiApp",
+    "slug": "fadiapp",
+    "version": "0.0.1",
+    "orientation": "default",
+    "scheme": "fadiapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "il.fadiapp.app",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "NSMicrophoneUsageDescription": "להקלטת הערות קוליות לאחר השיעור",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "il.fadiapp.app",
+      "permissions": [
+        "WAKE_LOCK",
+        "VIBRATE",
+        "RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-localization",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#1a1a1a"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "workerBaseUrl": "https://fadiapp-worker.example.workers.dev",
+      "googleClientIdAndroid": "262746796373-at1al0vfp1ghh2v4p3rm8bbb7fghcqfo.apps.googleusercontent.com",
+      "googleClientIdIos": "262746796373-qul4jr5sb0a9s08r2bg4vi24qtf62a2u.apps.googleusercontent.com",
+      "googleClientIdWeb": "262746796373-uk92014crrr9oim93ca356tdbg07i6sh.apps.googleusercontent.com",
+      "router": {},
+      "eas": {
+        "projectId": "138a102a-17fd-4322-8a5f-8c7e6ca4b674"
+      }
+    },
+    "owner": "zosimusion"
+  }
+}
