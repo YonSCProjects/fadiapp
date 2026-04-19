@@ -85,11 +85,25 @@ export default function TimerSpike() {
         <View style={styles.timerRow}>
           <View style={styles.timerCol}>
             <Text style={styles.timerLabel}>{he.timerSpike.remaining}</Text>
-            <Text style={styles.timerValue}>{formatMMSS(remainingS)}</Text>
+            <Text
+              style={styles.timerValue}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {formatMMSS(remainingS)}
+            </Text>
           </View>
           <View style={styles.timerCol}>
             <Text style={styles.timerLabel}>{he.timerSpike.elapsed}</Text>
-            <Text style={styles.timerValueSmall}>{formatMMSS(elapsedS)}</Text>
+            <Text
+              style={styles.timerValueSmall}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {formatMMSS(elapsedS)}
+            </Text>
           </View>
         </View>
 
@@ -169,12 +183,19 @@ const styles = StyleSheet.create({
   timerRow: { flexDirection: 'row', gap: 16, justifyContent: 'center', marginTop: 12 },
   timerCol: { flex: 1, alignItems: 'center', gap: 4 },
   timerLabel: { color: '#a0a0a8', fontSize: 12 },
-  timerValue: { color: '#f5f5f5', fontSize: 80, fontVariant: ['tabular-nums'], fontWeight: '300' },
-  timerValueSmall: {
-    color: '#a0a0a8',
-    fontSize: 36,
+  timerValue: {
+    color: '#f5f5f5',
+    fontSize: 64,
     fontVariant: ['tabular-nums'],
     fontWeight: '300',
+    textAlign: 'center',
+  },
+  timerValueSmall: {
+    color: '#a0a0a8',
+    fontSize: 32,
+    fontVariant: ['tabular-nums'],
+    fontWeight: '300',
+    textAlign: 'center',
   },
   steps: { color: '#a0a0a8', textAlign: 'center' },
   controls: { flexDirection: 'row', gap: 8, justifyContent: 'center', marginTop: 12 },

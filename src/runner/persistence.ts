@@ -1,17 +1,21 @@
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import type { RunnerState } from './wallClock';
 
-const FILE = `${FileSystem.documentDirectory}runner-spike.json`;
+const FILENAME = 'runner-spike.json';
+
+function runnerFile(): File {
+  return new File(Paths.document, FILENAME);
+}
 
 export async function saveRunner(state: RunnerState): Promise<void> {
-  await FileSystem.writeAsStringAsync(FILE, JSON.stringify(state));
+  runnerFile().write(JSON.stringify(state));
 }
 
 export async function loadRunner(): Promise<RunnerState | null> {
-  const info = await FileSystem.getInfoAsync(FILE);
-  if (!info.exists) return null;
+  const f = runnerFile();
+  if (!f.exists) return null;
   try {
-    const raw = await FileSystem.readAsStringAsync(FILE);
+    const raw = await f.text();
     return JSON.parse(raw) as RunnerState;
   } catch {
     return null;
@@ -19,6 +23,6 @@ export async function loadRunner(): Promise<RunnerState | null> {
 }
 
 export async function clearRunner(): Promise<void> {
-  const info = await FileSystem.getInfoAsync(FILE);
-  if (info.exists) await FileSystem.deleteAsync(FILE);
+  const f = runnerFile();
+  if (f.exists) f.delete();
 }

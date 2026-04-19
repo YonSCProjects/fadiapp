@@ -1,6 +1,8 @@
 // Minimal Google Drive v3 REST wrapper, scoped to drive.file (app-created files only).
 // Auth token is the teacher's OAuth access token, kept on-device only.
 
+import { randomUUID } from 'expo-crypto';
+
 const DRIVE = 'https://www.googleapis.com/drive/v3';
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
 const USERINFO = 'https://www.googleapis.com/oauth2/v2/userinfo';
@@ -53,7 +55,7 @@ export async function uploadJson(
   };
   if (parentFolderId) metadata.parents = [parentFolderId];
 
-  const boundary = `----fadiapp${crypto.randomUUID()}`;
+  const boundary = `----fadiapp${randomUUID()}`;
   const body =
     `--${boundary}\r\n` +
     `Content-Type: application/json; charset=UTF-8\r\n\r\n` +

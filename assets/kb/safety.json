@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "ramp_protocol": {
+    "name_he": "פרוטוקול חימום RAMP",
+    "source": "Jeffreys, 2006",
+    "phases": [
+      {
+        "key": "raise",
+        "name_he": "העלאת דופק",
+        "goal_he": "העלאה הדרגתית של טמפרטורת הגוף וקצב הלב ל-60-70% מהמקסימום.",
+        "typical_duration_s": 180,
+        "example_activities_he": [
+          "ריצה קלה",
+          "דילוגי חבל",
+          "צעד עולה ויורד (step-ups)",
+          "משחק תופסת קלה"
+        ]
+      },
+      {
+        "key": "activate",
+        "name_he": "הפעלת שרירים",
+        "goal_he": "הפעלת קבוצות השרירים הרלוונטיות לשיעור העיקרי.",
+        "typical_duration_s": 180,
+        "example_activities_he": [
+          "כיפופי ברכיים",
+          "פלאנק 20 שניות",
+          "מתיחת גשר (glute bridge)",
+          "מתח עליון על המוט (לכיתות מתקדמות)"
+        ]
+      },
+      {
+        "key": "mobilize",
+        "name_he": "גמישות דינמית",
+        "goal_he": "הגדלת טווח התנועה במפרקים המעורבים בפעילות הבאה.",
+        "typical_duration_s": 120,
+        "example_activities_he": [
+          "סיבובי זרועות קדימה ואחורה",
+          "נדנודי רגליים לצדדים וקדימה-אחורה",
+          "מתיחת חתול-פרה",
+          "תנועות מלא טווח של הירך"
+        ]
+      },
+      {
+        "key": "potentiate",
+        "name_he": "הכנה עצבית-שרירית",
+        "goal_he": "תרגילים ספציפיים במהירות גוברת לקראת הפעילות העיקרית.",
+        "typical_duration_s": 180,
+        "example_activities_he": [
+          "ריצות קצרות בעוצמה גוברת",
+          "קפיצות דו-רגליות קצרות",
+          "סקיפינגים A ו-B",
+          "הדמיית תנועת המשחק בחצי מהירות"
+        ]
+      }
+    ]
+  },
+  "fifa_11_plus": {
+    "name_he": "FIFA 11+",
+    "source": "F-MARC / FIFA Medical Assessment and Research Centre",
+    "goal_he": "תכנית חימום של 20 דקות המפחיתה פציעות גפה תחתונה ב-30% וקרע רצועה צולבת ב-60% (מטא-אנליזה של 6 RCT).",
+    "when_to_use_he": "לפני אימון כדורגל, כדוריד, או כל פעילות עם ריצות ושינויי כיוון חדים.",
+    "parts": [
+      {
+        "part": 1,
+        "name_he": "ריצות איטיות",
+        "duration_min": 8,
+        "exercises_he": [
+          "ריצה ישר",
+          "ריצה עם הרמת ירך",
+          "ריצה אחורנית",
+          "ריצת צד עם צעדי יד"
+        ]
+      },
+      {
+        "part": 2,
+        "name_he": "כוח, קפיצות ושיווי משקל",
+        "duration_min": 10,
+        "exercises_he": [
+          "פלאנק צד ורגיל",
+          "Nordic hamstring (בזוגות)",
+          "סינגל לג סקווט",
+          "קפיצות סקוורט"
+        ]
+      },
+      {
+        "part": 3,
+        "name_he": "ריצות מהירות",
+        "duration_min": 2,
+        "exercises_he": [
+          "ריצה מהירה מעבר למגרש",
+          "ריצה עם חיתוך פתאומי",
+          "קפיצת כתיפה עם בן זוג"
+        ]
+      }
+    ],
+    "evidence": "Thorborg et al., 2017 (Br J Sports Med): 30% reduction in lower-limb injuries; 60% reduction in ACL with high compliance."
+  },
+  "acsm_teen_hr_zones": {
+    "source": "ACSM Guidelines for Exercise Testing and Prescription, 11th ed.",
+    "formula_he": "HRmax ≈ 208 − (0.7 × גיל) — נוסחת Tanaka, מדויקת יותר לנוער מ-220−גיל.",
+    "zones": [
+      {
+        "key": "light",
+        "name_he": "קל",
+        "pct_hrr": [0.3, 0.39],
+        "goal_he": "חימום, שחרור, התאוששות פעילה."
+      },
+      {
+        "key": "moderate",
+        "name_he": "בינוני",
+        "pct_hrr": [0.4, 0.59],
+        "goal_he": "בנייה אירובית בסיסית, מומלץ לרוב זמן השיעור לבני 12-15."
+      },
+      {
+        "key": "vigorous",
+        "name_he": "מאומץ",
+        "pct_hrr": [0.6, 0.84],
+        "goal_he": "שיפור כושר אירובי משמעותי, בלוקים של 4-8 דקות."
+      },
+      {
+        "key": "near-max",
+        "name_he": "כמעט מקסימלי",
+        "pct_hrr": [0.85, 1.0],
+        "goal_he": "אינטרוולים קצרים בלבד, לא יותר מ-15% ממשך השיעור."
+      }
+    ],
+    "notes_he": [
+      "למתבגרים עם אסתמה מאומצת — הימנע מעבודה מעל 75% לפחות 20 דקות רצופות ללא מינון תרופתי.",
+      "אל תסתמך על HRmax בלבד בימי חום — RPE (דירוג מאמץ נתפס) 12-14 בטוח יותר."
+    ]
+  },
+  "who_cdc_youth_pa": {
+    "source": "WHO Guidelines on Physical Activity and Sedentary Behaviour, 2020; CDC Youth Physical Activity Guidelines",
+    "recommendations_he": [
+      "60 דקות פעילות בעצימות בינונית עד מאומצת ביום לגילאי 6-17.",
+      "פעילות חיזוק שרירים לפחות 3 פעמים בשבוע.",
+      "פעילות חיזוק עצמות לפחות 3 פעמים בשבוע (קפיצות, ריצה)."
+    ]
+  }
+}

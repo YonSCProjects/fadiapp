@@ -58,7 +58,7 @@ export default function DriveSpike() {
       saveToken(t).then(() => setToken(t));
       getUserInfo(t).then(setUser).catch((e) => append(`userinfo error: ${e}`));
     } else if (response?.type === 'error') {
-      append(`auth error: ${response.error?.message ?? 'unknown'}`);
+      append(`auth error: ${response.error?.description ?? response.error?.code ?? 'unknown'}`);
     }
   }, [response]);
 

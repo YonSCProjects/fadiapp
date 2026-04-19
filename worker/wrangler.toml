@@ -8,8 +8,8 @@ ANTHROPIC_DESIGN_MODEL = "claude-opus-4-7"
 ANTHROPIC_CHAT_MODEL = "claude-sonnet-4-6"
 
 # Secrets (set via `wrangler secret put`):
-#   ANTHROPIC_API_KEY   — server-side Anthropic API key
-#   TEACHER_JWT_SECRET  — HS256 secret for per-teacher JWTs
+#   ANTHROPIC_API_KEY      — server-side Anthropic API key
+#   WORKER_SHARED_SECRET   — bearer the mobile app sends on every request
 
 # [[d1_databases]]   # later: RAG corpus
 # binding = "RAG_DB"

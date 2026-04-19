@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "key": "tgfu",
+      "name_he": "למידה מבוססת משחק (TGfU)",
+      "name_en": "Teaching Games for Understanding",
+      "authors": "Bunker & Thorpe, 1982",
+      "summary_he": "גישה ילד-מרכזית שמציגה לתלמידים משחק פשוט תחילה ורק אחר כך מפתחת את המיומנויות הטכניות הנדרשות. התלמיד לומד טקטיקה לפני טכניקה — השאלה 'למה עושים את זה?' קודמת ל'איך עושים את זה?'.",
+      "when_to_use_he": "כיתה מעורבת ברמות מיומנות, מטרה של הגברת מוטיבציה, או כשרוצים לפתח חשיבה טקטית במשחקי כדור.",
+      "prompt_hint_he": "התחל עם משחק מותאם ופשוט, עצור לשאלות מכוונות ('מה היה קשה?'), וחזור למשחק עם פתרון מיומנותי.",
+      "tags": ["game-based", "tactical", "student-centered"],
+      "references": [
+        "Bunker, D., & Thorpe, R. (1982). A model for the teaching of games in secondary schools. Bulletin of Physical Education, 18(1), 5-8."
+      ]
+    },
+    {
+      "key": "sport-education",
+      "name_he": "מודל חינוך ספורטיבי",
+      "name_en": "Sport Education Model",
+      "authors": "Siedentop, 1994",
+      "summary_he": "מבנה של עונה ספורטיבית שלמה בשיעורי חינוך גופני. לתלמידים תפקידים קבועים: שחקן, מאמן, שופט, רשם תוצאות, סטטיסטיקאי. יש טורניר מסכם וטקס חתימה.",
+      "when_to_use_he": "יחידת לימוד ארוכה (4-8 שבועות), כיתה שחשוב לפתח בה אחריות ומנהיגות, משחקי קבוצה.",
+      "prompt_hint_he": "הגדר תפקיד לכל תלמיד, קבע לוח זמנים של עונה עם משחקי גומלין, והוסף יום גמר חגיגי.",
+      "tags": ["long-unit", "roles", "ownership"],
+      "references": [
+        "Siedentop, D. (1994). Sport Education: Quality PE Through Positive Sport Experiences. Human Kinetics."
+      ]
+    },
+    {
+      "key": "tpsr",
+      "name_he": "אחריות אישית וחברתית (TPSR)",
+      "name_en": "Teaching Personal and Social Responsibility",
+      "authors": "Hellison",
+      "summary_he": "חמש רמות של אחריות: כבוד, מאמץ, הכוונה עצמית, עזרה לאחרים, העברה לסיטואציות מחוץ לסל. השיעור נפתח בהצהרת יעד אישי ומסיים ברפלקסיה על הרמה שהושגה.",
+      "when_to_use_he": "כיתה עם אתגרי משמעת, אוכלוסיית סיכון, או כשרוצים לחזק תרבות כיתתית לטווח ארוך.",
+      "prompt_hint_he": "פתח ב-2 דקות הצהרת יעד, שלב שיחה קצרה על רמת האחריות באמצע, וסיים ב-3 דקות רפלקסיה בנושא.",
+      "tags": ["social-emotional", "values", "at-risk"],
+      "references": [
+        "Hellison, D. (2011). Teaching Personal and Social Responsibility Through Physical Activity (3rd ed.). Human Kinetics."
+      ]
+    },
+    {
+      "key": "skill-themes",
+      "name_he": "גישת נושאי המיומנויות",
+      "name_en": "Skill Themes Approach",
+      "authors": "Graham, Holt/Hale, Parker",
+      "summary_he": "התקדמות התפתחותית של מיומנויות יסוד: ניידות (ריצה, קפיצה), שליטה בחפץ (זריקה, תפיסה, בעיטה), ותנועות לא-ניידות (איזון, גלגול). מיומנות אחת במוקד, חוזרת על עצמה באינטנסיביות הולכת וגוברת לאורך השנים.",
+      "when_to_use_he": "חטיבת ביניים (ז-ט) או תלמידים עם פערי מיומנויות יסוד. פחות מתאים לכיתה י-יב מתקדמת.",
+      "prompt_hint_he": "בחר מיומנות אחת במוקד, תכנן 3 רמות התקדמות מקל לקשה, ואפשר לכל תלמיד לבחור את הרמה המתאימה לו.",
+      "tags": ["developmental", "middle-school", "fundamentals"],
+      "references": [
+        "Graham, G., Holt/Hale, S., & Parker, M. (2019). Children Moving: A Reflective Approach to Teaching Physical Education (10th ed.). McGraw-Hill."
+      ]
+    },
+    {
+      "key": "cooperative",
+      "name_he": "למידה שיתופית",
+      "name_en": "Cooperative Learning",
+      "authors": "Johnson & Johnson",
+      "summary_he": "תלמידים בקבוצות קטנות הטרוגניות עם תלות חיובית, אחריות אישית, אינטראקציה מקדמת ועיבוד קבוצתי. לא סתם 'עבודה בקבוצה' — מבנה מכוון שבו הצלחת הפרט תלויה בהצלחת הקבוצה.",
+      "when_to_use_he": "כיתה עם פערים בין-אישיים, או כשרוצים לקדם מיומנויות חברתיות לצד תוכן מקצועי.",
+      "prompt_hint_he": "הגדר תפקידים שונים בכל קבוצה (מפעיל, רושם, מעודד), והצב משימה שרק כל התפקידים יחד יכולים להשלים.",
+      "tags": ["group-work", "social", "inclusion"],
+      "references": [
+        "Dyson, B., & Casey, A. (2016). Cooperative Learning in Physical Education and Physical Activity. Routledge."
+      ]
+    },
+    {
+      "key": "mosston-spectrum",
+      "name_he": "ספקטרום סגנונות ההוראה של מוסטון",
+      "name_en": "Mosston's Spectrum of Teaching Styles",
+      "authors": "Mosston & Ashworth",
+      "summary_he": "11 סגנונות על רצף: מפקודה (A) שבה המורה מחליט הכל ועד הוראה עצמית (K) שבה התלמיד מחליט הכל. העברה בין סגנונות לפי מטרת השיעור, לא על בסיס העדפה אישית של המורה.",
+      "when_to_use_he": "תמיד — זה פריזמת החלטה, לא מודל אחד. פקודה למיומנות חדשה מסוכנת, תרגול להטמעה, גילוי מונחה לפיתוח חשיבה.",
+      "prompt_hint_he": "לכל בלוק בשיעור, ציין את סגנון ההוראה (A-K) ונמק למה בחרת בו.",
+      "tags": ["decision-framework", "versatile"],
+      "references": [
+        "Mosston, M., & Ashworth, S. (2008). Teaching Physical Education (First Online Edition). Spectrum Institute for Teaching and Learning."
+      ]
+    }
+  ]
+}

@@ -24,6 +24,13 @@
         "WAKE_LOCK",
         "VIBRATE",
         "RECORD_AUDIO"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["BROWSABLE", "DEFAULT"],
+          "data": { "scheme": "il.fadiapp.app" }
+        }
       ]
     },
     "plugins": [
@@ -36,13 +43,15 @@
         {
           "color": "#1a1a1a"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "workerBaseUrl": "https://fadiapp-worker.example.workers.dev",
+      "workerSharedSecret": "REPLACE_AFTER_WORKER_DEPLOY",
       "googleClientIdAndroid": "262746796373-at1al0vfp1ghh2v4p3rm8bbb7fghcqfo.apps.googleusercontent.com",
       "googleClientIdIos": "262746796373-qul4jr5sb0a9s08r2bg4vi24qtf62a2u.apps.googleusercontent.com",
       "googleClientIdWeb": "262746796373-uk92014crrr9oim93ca356tdbg07i6sh.apps.googleusercontent.com",

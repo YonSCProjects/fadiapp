@@ -1,9 +1,8 @@
-import { verifyTeacherJwt } from './auth';
 import { checkAnthropicMessages } from './sanitizer';
 
 export interface Env {
   ANTHROPIC_API_KEY: string;
-  TEACHER_JWT_SECRET: string;
+  WORKER_SHARED_SECRET: string;
   ANTHROPIC_DESIGN_MODEL: string;
   ANTHROPIC_CHAT_MODEL: string;
 }
@@ -11,6 +10,16 @@ export interface Env {
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const ALLOWED_MODELS = new Set(['claude-opus-4-7', 'claude-sonnet-4-6']);
+
+// Constant-time string comparison to avoid timing attacks on the bearer.
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
 
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
@@ -27,14 +36,8 @@ export default {
 
     const auth = request.headers.get('authorization') ?? '';
     const m = auth.match(/^Bearer\s+(.+)$/i);
-    if (!m) return json({ error: 'missing_bearer', reqId }, 401);
-
-    let teacherSub: string;
-    try {
-      const claims = await verifyTeacherJwt(m[1]!, env.TEACHER_JWT_SECRET);
-      teacherSub = claims.sub;
-    } catch (e) {
-      return json({ error: 'unauthorized', detail: String(e), reqId }, 401);
+    if (!m || !safeEqual(m[1]!, env.WORKER_SHARED_SECRET)) {
+      return json({ error: 'unauthorized', reqId }, 401);
     }
 
     let body: unknown;
@@ -51,7 +54,7 @@ export default {
 
     const verdict = checkAnthropicMessages(body);
     if (!verdict.ok) {
-      console.log(JSON.stringify({ reqId, teacher: teacherSub, blocked: verdict.reason }));
+      console.log(JSON.stringify({ reqId, blocked: verdict.reason }));
       return json({ error: 'pii_blocked', reason: verdict.reason, reqId }, 400);
     }
 
@@ -66,12 +69,7 @@ export default {
     });
 
     console.log(
-      JSON.stringify({
-        reqId,
-        teacher: teacherSub,
-        model,
-        upstream_status: upstream.status,
-      }),
+      JSON.stringify({ reqId, model, upstream_status: upstream.status }),
     );
 
     return new Response(upstream.body, {
