@@ -15,7 +15,7 @@ export default function Home() {
         <View style={styles.section}>
           <Card href="/(designer)" label={he.home.designerCta} />
           <Card href="/lessons" label={he.home.lessonsCta} />
-          <Card href="/(runner)" label={he.home.runnerCta} disabled />
+          <Card href="/lessons" label={he.home.runnerCta} />
           <Card href="/(docs)" label={he.home.docsCta} disabled />
         </View>
 

@@ -5,6 +5,9 @@ import { inArray, isNull, and } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { activities, type Activity, type Lesson, type LessonBlock } from '@/db/schema';
 import { getLesson, softDeleteLesson, updateLesson } from '@/db/repos/lessons';
+import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
+import { createInstance } from '@/db/repos/lessonInstances';
+import { blocksFromLesson } from '@/runner/fromLesson';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { BlockEditModal } from '@/ui/BlockEditModal';
@@ -52,6 +55,17 @@ export default function LessonDetail() {
       };
     }, [loadAll]),
   );
+
+  async function onStart() {
+    if (lesson === null || lesson === 'missing') return;
+    const { class: defaultClass } = await ensureDefaultTeacherAndClass();
+    const instance = await createInstance({
+      lesson_id: lesson.id,
+      class_id: defaultClass.id,
+      planned_blocks_json: blocksFromLesson(lesson.blocks_json),
+    });
+    router.push(`/runner/${instance.id}` as never);
+  }
 
   function confirmDeleteLesson() {
     Alert.alert(he.lessons.deleteConfirm, '', [
@@ -188,6 +202,10 @@ export default function LessonDetail() {
             </Section>
           )}
 
+          <Pressable style={styles.startBtn} onPress={onStart}>
+            <Text style={styles.startLabel}>▶  {he.runner.startLesson}</Text>
+          </Pressable>
+
           <Pressable style={styles.deleteBtn} onPress={confirmDeleteLesson}>
             <Text style={styles.deleteLabel}>{he.lessons.delete}</Text>
           </Pressable>
@@ -281,8 +299,16 @@ const styles = StyleSheet.create({
   blockNotes: { color: '#a0a0a8', fontSize: 13 },
   safetyNote: { color: '#fbbf24', fontSize: 14, lineHeight: 20 },
   bodyText: { color: '#e0e0e8', fontSize: 14, lineHeight: 20 },
-  deleteBtn: {
+  startBtn: {
     marginTop: 24,
+    padding: 16,
+    borderRadius: 10,
+    backgroundColor: '#16a34a',
+    alignItems: 'center',
+  },
+  startLabel: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  deleteBtn: {
+    marginTop: 12,
     padding: 14,
     borderRadius: 10,
     borderWidth: 1,

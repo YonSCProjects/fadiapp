@@ -7,6 +7,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { ensureRtl } from '@/i18n/rtl';
 import { useDbMigrations } from '@/db/client';
 import { importSeedKb } from '@/kb/importer';
+import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
 
 // Must run at module load, before expo-router mounts, so that when the OAuth
 // redirect reopens the app it lands back in the pending auth session instead
@@ -25,12 +26,16 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!migrationsReady) return;
-    importSeedKb()
-      .then((result) => {
+    (async () => {
+      try {
+        await ensureDefaultTeacherAndClass();
+        const result = await importSeedKb();
         if (__DEV__) console.log('[kb] imported:', result);
         setKbReady(true);
-      })
-      .catch((e: unknown) => setKbError(e as Error));
+      } catch (e) {
+        setKbError(e as Error);
+      }
+    })();
   }, [migrationsReady]);
 
   if (migrationsError || kbError) {
