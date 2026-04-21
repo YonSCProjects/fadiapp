@@ -1,17 +1,20 @@
 import { Link, Stack } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { he } from '@/i18n/he';
+import { useBottomInset } from '@/ui/useBottomInset';
 
 export default function Home() {
+  const bottomPad = useBottomInset();
   return (
     <>
       <Stack.Screen options={{ title: he.appName }} />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.container} contentContainerStyle={[styles.content, bottomPad]}>
         <Text style={styles.title}>{he.home.title}</Text>
         <Text style={styles.subtitle}>{he.home.subtitle}</Text>
 
         <View style={styles.section}>
-          <Card href="/(designer)" label={he.home.designerCta} disabled />
+          <Card href="/(designer)" label={he.home.designerCta} />
+          <Card href="/lessons" label={he.home.lessonsCta} />
           <Card href="/(runner)" label={he.home.runnerCta} disabled />
           <Card href="/(docs)" label={he.home.docsCta} disabled />
         </View>

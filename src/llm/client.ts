@@ -7,14 +7,20 @@ const extra = (Constants.expoConfig?.extra ?? {}) as {
 
 export type LlmModel = 'claude-opus-4-7' | 'claude-sonnet-4-6';
 
-export type LlmTextBlock = { type: 'text'; text: string };
+export type LlmTextBlock = {
+  type: 'text';
+  text: string;
+  cache_control?: { type: 'ephemeral' };
+};
 export type LlmContent = string | LlmTextBlock[];
 
 export type LlmMessage = { role: 'user' | 'assistant'; content: LlmContent };
 
+export type LlmSystem = string | LlmTextBlock[];
+
 export type LlmRequest = {
   model: LlmModel;
-  system?: string;
+  system?: LlmSystem;
   messages: LlmMessage[];
   max_tokens?: number;
   temperature?: number;
@@ -43,13 +49,15 @@ function workerConfig(): { base: string; secret: string } {
 export async function callLlm(req: LlmRequest): Promise<LlmResponse> {
   const { base, secret } = workerConfig();
   const url = `${base.replace(/\/$/, '')}/v1/messages`;
-  const body = {
+  // temperature is deprecated on Opus 4.7 and may be on newer models generally;
+  // only include it if explicitly provided.
+  const body: Record<string, unknown> = {
     model: req.model,
     system: req.system,
     messages: req.messages,
     max_tokens: req.max_tokens ?? 4096,
-    temperature: req.temperature ?? 0.4,
   };
+  if (typeof req.temperature === 'number') body.temperature = req.temperature;
   const res = await fetch(url, {
     method: 'POST',
     headers: {

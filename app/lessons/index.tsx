@@ -1,0 +1,79 @@
+import { useCallback, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { he } from '@/i18n/he';
+import { listLessons } from '@/db/repos/lessons';
+import type { Lesson } from '@/db/schema';
+import { useBottomInset } from '@/ui/useBottomInset';
+
+export default function LessonsList() {
+  const router = useRouter();
+  const [lessons, setLessons] = useState<Lesson[] | null>(null);
+  const bottomPad = useBottomInset();
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      listLessons({ limit: 100 }).then((rows) => {
+        if (active) setLessons(rows);
+      });
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
+
+  if (lessons === null) {
+    return (
+      <>
+        <Stack.Screen options={{ title: he.lessons.title }} />
+        <View style={styles.empty} />
+      </>
+    );
+  }
+
+  if (lessons.length === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: he.lessons.title }} />
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>{he.lessons.empty}</Text>
+        </View>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Stack.Screen options={{ title: he.lessons.title }} />
+      <FlatList
+        data={lessons}
+        keyExtractor={(l) => l.id}
+        contentContainerStyle={[styles.listContent, bottomPad]}
+        renderItem={({ item }) => (
+          <Pressable style={styles.row} onPress={() => router.push(`/lessons/${item.id}` as never)}>
+            <Text style={styles.rowTitle}>{item.title_he}</Text>
+            <Text style={styles.rowMeta}>
+              כיתה {item.grade_band} · {item.duration_min} דק׳ · {item.pedagogical_model ?? '—'}
+            </Text>
+            <Text style={styles.rowGoal} numberOfLines={1}>
+              {item.goal_he}
+            </Text>
+          </Pressable>
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+      />
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  listContent: { padding: 16, gap: 0 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
+  emptyText: { color: '#a0a0a8', fontSize: 16, lineHeight: 24, textAlign: 'center' },
+  row: { backgroundColor: '#1a1a20', padding: 14, borderRadius: 10, gap: 4 },
+  rowTitle: { color: '#f5f5f5', fontSize: 17, fontWeight: '600' },
+  rowMeta: { color: '#a0a0a8', fontSize: 12 },
+  rowGoal: { color: '#c0c0c8', fontSize: 13, marginTop: 2 },
+  separator: { height: 10 },
+});

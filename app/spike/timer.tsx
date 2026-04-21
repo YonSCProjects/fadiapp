@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
-import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { he } from '@/i18n/he';
 import {
   advanceIfComplete,
@@ -35,10 +34,6 @@ export default function TimerSpike() {
     loadRunner().then((saved) => {
       if (saved) setRunner(advanceIfComplete(saved, Date.now()));
     });
-    activateKeepAwakeAsync('timer-spike').catch(() => {});
-    return () => {
-      deactivateKeepAwake('timer-spike');
-    };
   }, []);
 
   useEffect(() => {

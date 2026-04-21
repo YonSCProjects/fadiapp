@@ -1,6 +1,8 @@
+import '@/polyfills';
 import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { ensureRtl } from '@/i18n/rtl';
 import { useDbMigrations } from '@/db/client';
@@ -49,12 +51,14 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: '#1a1a1a' },
-        headerTintColor: '#f5f5f5',
-        contentStyle: { backgroundColor: '#0f0f10' },
-      }}
-    />
+    <SafeAreaProvider>
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: '#1a1a1a' },
+          headerTintColor: '#f5f5f5',
+          contentStyle: { backgroundColor: '#0f0f10' },
+        }}
+      />
+    </SafeAreaProvider>
   );
 }
