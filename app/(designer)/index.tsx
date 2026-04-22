@@ -326,7 +326,13 @@ function GatherForm(props: {
   const styles = useStyles();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={[styles.content, bottomPad]}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, bottomPad]}
+      // Let taps on children (like autofill Pressables) fire their onPress
+      // before the keyboard-dismiss handler consumes them.
+      keyboardShouldPersistTaps="handled"
+    >
       <Field label={he.designer.grade}>
         <Chips
           options={GRADES as unknown as number[]}
