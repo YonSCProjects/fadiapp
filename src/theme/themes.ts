@@ -142,7 +142,143 @@ export const mediterranean: ThemeTokens = {
   },
 };
 
-export const THEMES: ThemeTokens[] = [slate, daylight, mediterranean];
+// Soft forest — nature palette, dark mode. Muted greens + sage accent.
+export const forest: ThemeTokens = {
+  name: 'forest',
+  nameHe: 'יער',
+  mode: 'dark',
+  bg: {
+    app: '#1a2821',
+    runner: '#121a15',
+    card: '#253a31',
+    input: '#2f4a3d',
+    modal: '#1a2821',
+    subtle: '#1f3128',
+    overlay: 'rgba(0,8,4,0.55)',
+  },
+  border: {
+    default: '#3b5546',
+    subtle: '#223328',
+  },
+  text: {
+    primary: '#eaf2ec',
+    secondary: '#c8d6cc',
+    muted: '#97a89d',
+    faint: '#6a7c70',
+    onAccent: '#121a15',
+  },
+  accent: {
+    primary: '#a5cfa2',     // sage
+    primaryText: '#121a15',
+    link: '#c2e0bf',
+  },
+  status: {
+    success: '#a5cfa2',
+    successStrong: '#7bb17a',
+    warning: '#e8c583',
+    warningBg: '#36301c',
+    warningText: '#f0d89b',
+    danger: '#e69b94',
+    dangerBorder: '#5a3330',
+  },
+  header: {
+    bg: '#1f3128',
+    tint: '#eaf2ec',
+  },
+};
+
+// Lavender — light mode, dusty purple. Different personality from Daylight's
+// warm cream; cooler and calmer.
+export const lavender: ThemeTokens = {
+  name: 'lavender',
+  nameHe: 'לבנדר',
+  mode: 'light',
+  bg: {
+    app: '#f3eef8',        // lavender mist
+    runner: '#ffffff',
+    card: '#ffffff',
+    input: '#e3d7ef',       // dustier lavender
+    modal: '#f3eef8',
+    subtle: '#ebe3f3',
+    overlay: 'rgba(50,35,65,0.28)',
+  },
+  border: {
+    default: '#cbb9dc',
+    subtle: '#ddcde9',
+  },
+  text: {
+    primary: '#2e1f40',     // deep plum-brown
+    secondary: '#5a4770',
+    muted: '#8c7aa0',
+    faint: '#b3a5c0',
+    onAccent: '#ffffff',
+  },
+  accent: {
+    primary: '#9575b8',     // warm purple
+    primaryText: '#ffffff',
+    link: '#7859a0',
+  },
+  status: {
+    success: '#7ea580',
+    successStrong: '#6a8d6b',
+    warning: '#c48a52',
+    warningBg: '#f3dfc0',
+    warningText: '#7d521f',
+    danger: '#b86a78',
+    dangerBorder: '#e5c3c9',
+  },
+  header: {
+    bg: '#ffffff',
+    tint: '#2e1f40',
+  },
+};
+
+// Sunset — warm dusk palette, dark mode. Plum background + peach accent.
+export const sunset: ThemeTokens = {
+  name: 'sunset',
+  nameHe: 'שקיעה',
+  mode: 'dark',
+  bg: {
+    app: '#2b1d2c',        // deep plum
+    runner: '#1d1320',
+    card: '#3d2a3e',
+    input: '#4d3850',
+    modal: '#2b1d2c',
+    subtle: '#322334',
+    overlay: 'rgba(20,8,20,0.55)',
+  },
+  border: {
+    default: '#5a4258',
+    subtle: '#382a3a',
+  },
+  text: {
+    primary: '#f7e7ea',
+    secondary: '#d9c6d0',
+    muted: '#a69099',
+    faint: '#735e6a',
+    onAccent: '#2b1d2c',
+  },
+  accent: {
+    primary: '#f5a68b',     // peach
+    primaryText: '#2b1d2c',
+    link: '#f5a68b',
+  },
+  status: {
+    success: '#b9d4a6',
+    successStrong: '#8db379',
+    warning: '#f0c278',
+    warningBg: '#3a2a18',
+    warningText: '#f5d094',
+    danger: '#ed9b9b',
+    dangerBorder: '#5a3434',
+  },
+  header: {
+    bg: '#1d1320',
+    tint: '#f7e7ea',
+  },
+};
+
+export const THEMES: ThemeTokens[] = [slate, daylight, mediterranean, forest, lavender, sunset];
 
 export function getThemeByName(name: string | null | undefined): ThemeTokens {
   if (!name) return slate;
