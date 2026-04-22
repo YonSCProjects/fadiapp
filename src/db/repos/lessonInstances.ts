@@ -3,10 +3,11 @@ import { db } from '../client';
 import {
   lesson_instances,
   type InstanceStatus,
+  type LessonBlock,
   type LessonInstance,
   type NewLessonInstance,
 } from '../schema';
-import type { BlockState, RunnerState } from '@/runner/wallClock';
+import type { RunnerState } from '@/runner/wallClock';
 
 // The runner's persisted state lives in lesson_instances.actual_blocks_json.
 // Shape defined below; we keep it here rather than in schema.ts so the wall-
@@ -46,7 +47,7 @@ export function isActualBlocksRecord(x: unknown): x is ActualBlocksRecord {
 export async function createInstance(input: {
   lesson_id: string;
   class_id: string;
-  planned_blocks_json: BlockState[];
+  planned_blocks_json: LessonBlock[];
   scheduled_at?: Date;
 }): Promise<LessonInstance> {
   const [row] = await db

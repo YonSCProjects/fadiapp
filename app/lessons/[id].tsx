@@ -7,7 +7,6 @@ import { activities, type Activity, type Lesson, type LessonBlock } from '@/db/s
 import { getLesson, softDeleteLesson, updateLesson } from '@/db/repos/lessons';
 import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
 import { createInstance } from '@/db/repos/lessonInstances';
-import { blocksFromLesson } from '@/runner/fromLesson';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { BlockEditModal } from '@/ui/BlockEditModal';
@@ -66,7 +65,7 @@ export default function LessonDetail() {
     const instance = await createInstance({
       lesson_id: lesson.id,
       class_id: defaultClass.id,
-      planned_blocks_json: blocksFromLesson(lesson.blocks_json),
+      planned_blocks_json: lesson.blocks_json,
     });
     router.push(`/runner/${instance.id}` as never);
   }
