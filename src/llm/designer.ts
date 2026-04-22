@@ -59,7 +59,7 @@ export async function designLesson(
         },
       ],
       messages: [{ role: 'user', content: userMessage }],
-      max_tokens: 4096,
+      max_tokens: 8192,
     },
     handlers,
   );
@@ -72,7 +72,13 @@ export async function designLesson(
   }
 
   const rawText = firstText(response);
-  const lesson = parseLessonJson(rawText);
+  const rawLesson = parseLessonJson(rawText);
+  // Post-parse normalization: the LLM routinely drifts 5–15% off the
+  // requested total duration despite explicit instructions. Rather than
+  // surface wrong numbers, scale the block durations proportionally to
+  // hit the target. Values round to the nearest 30s so UI shows clean
+  // minutes.
+  const lesson = normalizeDurations(rawLesson);
 
   const refToId = new Map(whitelist.map((a) => [a.source_ref ?? a.id, a]));
   const used: Activity[] = [];
@@ -96,6 +102,35 @@ export async function designLesson(
     usage: response.usage,
     rawResponseText: rawText,
   };
+}
+
+function normalizeDurations(lesson: GeneratedLesson): GeneratedLesson {
+  const target = lesson.duration_min * 60;
+  const total = lesson.blocks_json.reduce((acc, b) => acc + b.duration_s, 0);
+  if (total <= 0) return lesson;
+  const scale = target / total;
+  // Avoid rebalancing when already within 2% — leaves the LLM's round numbers
+  // alone when it got them right.
+  if (Math.abs(total - target) / target < 0.02) return lesson;
+  const scaledBlocks = lesson.blocks_json.map((b) => ({
+    ...b,
+    duration_s: Math.max(30, Math.round((b.duration_s * scale) / 30) * 30),
+  }));
+  // Rounding can introduce a small residual drift; absorb it into the largest
+  // block so the total lands exactly.
+  const scaledTotal = scaledBlocks.reduce((acc, b) => acc + b.duration_s, 0);
+  const residual = target - scaledTotal;
+  if (residual !== 0 && scaledBlocks.length > 0) {
+    let maxIdx = 0;
+    for (let i = 1; i < scaledBlocks.length; i++) {
+      if (scaledBlocks[i]!.duration_s > scaledBlocks[maxIdx]!.duration_s) maxIdx = i;
+    }
+    scaledBlocks[maxIdx] = {
+      ...scaledBlocks[maxIdx]!,
+      duration_s: Math.max(30, scaledBlocks[maxIdx]!.duration_s + residual),
+    };
+  }
+  return { ...lesson, blocks_json: scaledBlocks };
 }
 
 // Rewrites the block IDs from source_refs (what the LLM returned) to the actual
