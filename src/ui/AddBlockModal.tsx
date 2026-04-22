@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ulid } from 'ulidx';
 import type { Activity, LessonBlock } from '@/db/schema';
 import { he } from '@/i18n/he';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 import { ActivityPickerModal } from './ActivityPickerModal';
 
 type Props = {
@@ -23,6 +25,8 @@ export function AddBlockModal({ visible, whitelist, onClose, onAdd }: Props) {
   const [activity, setActivity] = useState<Activity | null>(null);
   const [durationMin, setDurationMin] = useState('5');
   const [pickerOpen, setPickerOpen] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function reset() {
     setPhase('main');
@@ -63,7 +67,7 @@ export function AddBlockModal({ visible, whitelist, onClose, onAdd }: Props) {
         </View>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Field label={he.lessons.blockPhase}>
+          <Field styles={styles} label={he.lessons.blockPhase}>
             <View style={styles.chipsRow}>
               {PHASES.map((p) => {
                 const selected = phase === p.key;
@@ -80,7 +84,7 @@ export function AddBlockModal({ visible, whitelist, onClose, onAdd }: Props) {
             </View>
           </Field>
 
-          <Field label={he.lessons.blockActivities}>
+          <Field styles={styles} label={he.lessons.blockActivities}>
             {activity ? (
               <View style={styles.activityRow}>
                 <Text style={styles.activityName}>{activity.name_he}</Text>
@@ -95,7 +99,7 @@ export function AddBlockModal({ visible, whitelist, onClose, onAdd }: Props) {
             )}
           </Field>
 
-          <Field label={he.lessons.blockDuration}>
+          <Field styles={styles} label={he.lessons.blockDuration}>
             <View style={styles.durationRow}>
               <Pressable
                 style={styles.stepBtn}
@@ -145,7 +149,17 @@ export function AddBlockModal({ visible, whitelist, onClose, onAdd }: Props) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+type S = ReturnType<typeof createStyles>;
+
+function Field({
+  label,
+  children,
+  styles,
+}: {
+  label: string;
+  children: React.ReactNode;
+  styles: S;
+}) {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -154,8 +168,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f10', paddingTop: 24 },
+const createStyles = (theme: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg.modal, paddingTop: 24 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -163,27 +177,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1a1a20',
+    borderBottomColor: theme.border.subtle,
   },
-  title: { color: '#f5f5f5', fontSize: 20, fontWeight: '700' },
-  close: { color: '#a0a0a8', fontSize: 32, lineHeight: 32 },
+  title: { color: theme.text.primary, fontSize: 20, fontWeight: '700' },
+  close: { color: theme.text.muted, fontSize: 32, lineHeight: 32 },
   content: { padding: 20, gap: 14, paddingBottom: 60 },
   field: { gap: 8 },
-  fieldLabel: { color: '#a0a0a8', fontSize: 14 },
+  fieldLabel: { color: theme.text.muted, fontSize: 14 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
+    backgroundColor: theme.bg.input,
+    color: theme.text.primary,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     overflow: 'hidden',
     fontSize: 14,
   },
-  chipSelected: { backgroundColor: '#3b82f6', color: '#ffffff' },
+  chipSelected: { backgroundColor: theme.accent.primary, color: theme.accent.primaryText },
   input: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
+    backgroundColor: theme.bg.input,
+    color: theme.text.primary,
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
@@ -191,40 +205,40 @@ const styles = StyleSheet.create({
   durationRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   durationInput: { flex: 1, textAlign: 'center', fontSize: 20 },
   stepBtn: {
-    backgroundColor: '#23232a',
+    backgroundColor: theme.bg.input,
     width: 48,
     height: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepBtnLabel: { color: '#f5f5f5', fontSize: 24, fontWeight: '500' },
+  stepBtnLabel: { color: theme.text.primary, fontSize: 24, fontWeight: '500' },
   activityRow: {
-    backgroundColor: '#1a1a20',
+    backgroundColor: theme.bg.card,
     padding: 12,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  activityName: { color: '#f5f5f5', fontSize: 16, flex: 1 },
-  activityAction: { color: '#3b82f6', fontSize: 13 },
+  activityName: { color: theme.text.primary, fontSize: 16, flex: 1 },
+  activityAction: { color: theme.accent.link, fontSize: 13 },
   addActivityBtn: {
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#3b82f6',
+    borderColor: theme.accent.primary,
     borderStyle: 'dashed',
     alignItems: 'center',
   },
-  addActivityLabel: { color: '#3b82f6', fontSize: 14 },
+  addActivityLabel: { color: theme.accent.link, fontSize: 14 },
   primaryBtn: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: theme.accent.primary,
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 8,
   },
   primaryBtnDisabled: { opacity: 0.4 },
-  primaryBtnLabel: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  primaryBtnLabel: { color: theme.accent.primaryText, fontSize: 16, fontWeight: '600' },
 });

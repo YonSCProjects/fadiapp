@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Activity, ActivityCategory } from '@/db/schema';
 import { he } from '@/i18n/he';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 
 type Props = {
   visible: boolean;
@@ -28,6 +30,8 @@ export function ActivityPickerModal({
   initialCategory = 'all',
 }: Props) {
   const [category, setCategory] = useState<ActivityCategory | 'all'>(initialCategory);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const filtered = useMemo(() => {
     if (category === 'all') return activities;
@@ -93,40 +97,41 @@ export function ActivityPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f10', paddingTop: 24 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a20',
-  },
-  title: { color: '#f5f5f5', fontSize: 20, fontWeight: '700' },
-  close: { color: '#a0a0a8', fontSize: 32, lineHeight: 32 },
-  categoriesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    padding: 16,
-  },
-  chip: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    overflow: 'hidden',
-    fontSize: 14,
-  },
-  chipSelected: { backgroundColor: '#3b82f6', color: '#ffffff' },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  emptyText: { color: '#a0a0a8', fontSize: 14 },
-  listContent: { padding: 16, paddingBottom: 48 },
-  row: { backgroundColor: '#1a1a20', padding: 14, borderRadius: 10, gap: 4 },
-  rowName: { color: '#f5f5f5', fontSize: 16, fontWeight: '500' },
-  rowMeta: { color: '#a0a0a8', fontSize: 12 },
-  separator: { height: 8 },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg.modal, paddingTop: 24 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border.subtle,
+    },
+    title: { color: theme.text.primary, fontSize: 20, fontWeight: '700' },
+    close: { color: theme.text.muted, fontSize: 32, lineHeight: 32 },
+    categoriesRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      padding: 16,
+    },
+    chip: {
+      backgroundColor: theme.bg.input,
+      color: theme.text.primary,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 20,
+      overflow: 'hidden',
+      fontSize: 14,
+    },
+    chipSelected: { backgroundColor: theme.accent.primary, color: theme.accent.primaryText },
+    empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
+    emptyText: { color: theme.text.muted, fontSize: 14 },
+    listContent: { padding: 16, paddingBottom: 48 },
+    row: { backgroundColor: theme.bg.card, padding: 14, borderRadius: 10, gap: 4 },
+    rowName: { color: theme.text.primary, fontSize: 16, fontWeight: '500' },
+    rowMeta: { color: theme.text.muted, fontSize: 12 },
+    separator: { height: 8 },
+  });

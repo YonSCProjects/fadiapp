@@ -23,6 +23,8 @@ import {
 } from '@/db/repos/teachers';
 import { EquipmentManagerModal } from '@/ui/EquipmentManagerModal';
 import { ModelManagerModal } from '@/ui/ModelManagerModal';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 import type { Activity, PedagogicalModel } from '@/db/schema';
 import { and, inArray, isNull } from 'drizzle-orm';
 import { activities } from '@/db/schema';
@@ -52,6 +54,8 @@ type Phase = 'gather' | 'generating' | 'preview' | 'saved' | 'error';
 
 export default function DesignerHome() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [phase, setPhase] = useState<Phase>('gather');
   const [error, setError] = useState<string | null>(null);
   const [lesson, setLesson] = useState<GeneratedLesson | null>(null);
@@ -279,6 +283,11 @@ export default function DesignerHome() {
   );
 }
 
+function useStyles() {
+  const theme = useTheme();
+  return useMemo(() => createStyles(theme), [theme]);
+}
+
 function GatherForm(props: {
   grade: number;
   setGrade: (n: number) => void;
@@ -311,6 +320,7 @@ function GatherForm(props: {
     props.setEquipment(next);
   };
   const bottomPad = useBottomInset();
+  const styles = useStyles();
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, bottomPad]}>
@@ -437,6 +447,7 @@ function LessonPreview({
   // resolves them to real activity IDs before persisting.
   const refToName = new Map(whitelist.map((a) => [a.source_ref ?? a.id, a.name_he]));
   const bottomPad = useBottomInset();
+  const styles = useStyles();
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, bottomPad]}>
@@ -471,6 +482,7 @@ function GoalInputWithAutofill({
   suggestions: string[];
 }) {
   const [focused, setFocused] = useState(false);
+  const styles = useStyles();
 
   // Filter suggestions by current input (case-insensitive substring).
   // If input matches a suggestion exactly, hide it — no point suggesting
@@ -526,6 +538,7 @@ function GoalInputWithAutofill({
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -545,6 +558,7 @@ function FieldWithAction({
   onAction: () => void;
   children: React.ReactNode;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.field}>
       <View style={styles.fieldHeader}>
@@ -569,6 +583,7 @@ function Chips<T extends string | number>({
   onChange: (v: T) => void;
   renderLabel: (v: T) => string;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.chipsRow}>
       {options.map((opt) => {
@@ -598,6 +613,7 @@ function Btn({
   primary?: boolean;
   disabled?: boolean;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -609,105 +625,115 @@ function Btn({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 20, gap: 14 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  generatingContainer: { flex: 1, padding: 20, gap: 16 },
-  generatingHeader: { alignItems: 'center', gap: 8, paddingVertical: 16 },
-  genTitle: { color: '#f5f5f5', fontSize: 18, marginTop: 12 },
-  genSub: { color: '#a0a0a8', fontSize: 12, fontVariant: ['tabular-nums'] },
-  streamView: {
-    flex: 1,
-    backgroundColor: '#0a0a10',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#1a1a20',
-  },
-  streamContent: { padding: 12 },
-  streamText: {
-    color: '#86efac',
-    fontFamily: 'Courier',
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  errorText: { color: '#ff8a8a', lineHeight: 22, textAlign: 'center' },
-  savedTitle: { color: '#86efac', fontSize: 22, fontWeight: '700' },
-  field: { gap: 8 },
-  fieldLabel: { color: '#a0a0a8', fontSize: 14 },
-  fieldHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  fieldAction: { color: '#3b82f6', fontSize: 13 },
-  input: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  autofillBox: {
-    backgroundColor: '#16161c',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2a2a32',
-    paddingVertical: 6,
-  },
-  autofillLabel: {
-    color: '#6a6a72',
-    fontSize: 11,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-  },
-  autofillRow: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  autofillText: {
-    color: '#c0c0c8',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  chip: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  chipSelected: { backgroundColor: '#3b82f6', color: '#ffffff' },
-  row: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  btn: {
-    flex: 1,
-    backgroundColor: '#23232a',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  btnPrimary: { backgroundColor: '#3b82f6' },
-  btnDisabled: { opacity: 0.4 },
-  btnLabel: { color: '#f5f5f5', fontSize: 16, fontWeight: '600' },
-  btnLabelPrimary: { color: '#fff' },
-  lessonTitle: { color: '#f5f5f5', fontSize: 24, fontWeight: '700' },
-  lessonMeta: { color: '#a0a0a8', fontSize: 12 },
-  lessonGoal: { color: '#e0e0e8', fontSize: 16, lineHeight: 22 },
-  section: { gap: 8, marginTop: 12 },
-  sectionLabel: { color: '#a0a0a8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  block: {
-    backgroundColor: '#1a1a20',
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2a2a32',
-    gap: 6,
-  },
-  blockHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  blockName: { color: '#f5f5f5', fontSize: 16, fontWeight: '600' },
-  blockDuration: { color: '#a0a0a8', fontSize: 14 },
-  blockActivities: { color: '#c0c0c8', fontSize: 14 },
-  blockCues: { color: '#86efac', fontSize: 13, fontStyle: 'italic' },
-  blockNotes: { color: '#a0a0a8', fontSize: 13 },
-  safetyNote: { color: '#fbbf24', fontSize: 14, lineHeight: 20 },
-  bodyText: { color: '#e0e0e8', fontSize: 14, lineHeight: 20 },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    container: { flex: 1 },
+    content: { padding: 20, gap: 14 },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
+    generatingContainer: { flex: 1, padding: 20, gap: 16 },
+    generatingHeader: { alignItems: 'center', gap: 8, paddingVertical: 16 },
+    genTitle: { color: theme.text.primary, fontSize: 18, marginTop: 12 },
+    genSub: { color: theme.text.muted, fontSize: 12, fontVariant: ['tabular-nums'] },
+    streamView: {
+      flex: 1,
+      backgroundColor: theme.bg.runner,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.border.subtle,
+    },
+    streamContent: { padding: 12 },
+    streamText: {
+      color: theme.status.success,
+      fontFamily: 'Courier',
+      fontSize: 12,
+      lineHeight: 18,
+    },
+    errorText: { color: theme.status.danger, lineHeight: 22, textAlign: 'center' },
+    savedTitle: { color: theme.status.success, fontSize: 22, fontWeight: '700' },
+    field: { gap: 8 },
+    fieldLabel: { color: theme.text.muted, fontSize: 14 },
+    fieldHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    fieldAction: { color: theme.accent.link, fontSize: 13 },
+    input: {
+      backgroundColor: theme.bg.input,
+      color: theme.text.primary,
+      padding: 12,
+      borderRadius: 8,
+      fontSize: 16,
+    },
+    textarea: { minHeight: 80, textAlignVertical: 'top' },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    autofillBox: {
+      backgroundColor: theme.bg.subtle,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.border.default,
+      paddingVertical: 6,
+    },
+    autofillLabel: {
+      color: theme.text.faint,
+      fontSize: 11,
+      paddingHorizontal: 14,
+      paddingVertical: 4,
+    },
+    autofillRow: {
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+    },
+    autofillText: {
+      color: theme.text.secondary,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    chip: {
+      backgroundColor: theme.bg.input,
+      color: theme.text.primary,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 20,
+      overflow: 'hidden',
+    },
+    chipSelected: { backgroundColor: theme.accent.primary, color: theme.accent.primaryText },
+    row: { flexDirection: 'row', gap: 8, marginTop: 12 },
+    btn: {
+      flex: 1,
+      backgroundColor: theme.bg.input,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    btnPrimary: { backgroundColor: theme.accent.primary },
+    btnDisabled: { opacity: 0.4 },
+    btnLabel: { color: theme.text.primary, fontSize: 16, fontWeight: '600' },
+    btnLabelPrimary: { color: theme.accent.primaryText },
+    lessonTitle: { color: theme.text.primary, fontSize: 24, fontWeight: '700' },
+    lessonMeta: { color: theme.text.muted, fontSize: 12 },
+    lessonGoal: { color: theme.text.secondary, fontSize: 16, lineHeight: 22 },
+    section: { gap: 8, marginTop: 12 },
+    sectionLabel: {
+      color: theme.text.muted,
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    block: {
+      backgroundColor: theme.bg.card,
+      padding: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.border.default,
+      gap: 6,
+    },
+    blockHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+    blockName: { color: theme.text.primary, fontSize: 16, fontWeight: '600' },
+    blockDuration: { color: theme.text.muted, fontSize: 14 },
+    blockActivities: { color: theme.text.secondary, fontSize: 14 },
+    blockCues: { color: theme.status.success, fontSize: 13, fontStyle: 'italic' },
+    blockNotes: { color: theme.text.muted, fontSize: 13 },
+    safetyNote: { color: theme.status.warning, fontSize: 14, lineHeight: 20 },
+    bodyText: { color: theme.text.secondary, fontSize: 14, lineHeight: 20 },
+  });

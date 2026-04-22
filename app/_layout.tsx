@@ -8,6 +8,7 @@ import { ensureRtl } from '@/i18n/rtl';
 import { useDbMigrations } from '@/db/client';
 import { importSeedKb } from '@/kb/importer';
 import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
 // Must run at module load, before expo-router mounts, so that when the OAuth
 // redirect reopens the app it lands back in the pending auth session instead
@@ -15,6 +16,17 @@ import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
 WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <AppShell />
+      </SafeAreaProvider>
+    </ThemeProvider>
+  );
+}
+
+function AppShell() {
+  const theme = useTheme();
   const [rtlReady, setRtlReady] = useState(false);
   const [kbReady, setKbReady] = useState(false);
   const [kbError, setKbError] = useState<Error | null>(null);
@@ -41,29 +53,42 @@ export default function RootLayout() {
   if (migrationsError || kbError) {
     const err = migrationsError ?? kbError;
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Text style={{ color: '#ff8a8a' }}>שגיאת טעינה: {String(err)}</Text>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          backgroundColor: theme.bg.app,
+        }}
+      >
+        <Text style={{ color: theme.status.danger }}>שגיאת טעינה: {String(err)}</Text>
       </View>
     );
   }
 
   if (!rtlReady || !migrationsReady || !kbReady) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.bg.app,
+        }}
+      >
+        <ActivityIndicator color={theme.accent.primary} />
       </View>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: '#1a1a1a' },
-          headerTintColor: '#f5f5f5',
-          contentStyle: { backgroundColor: '#0f0f10' },
-        }}
-      />
-    </SafeAreaProvider>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.header.bg },
+        headerTintColor: theme.header.tint,
+        contentStyle: { backgroundColor: theme.bg.app },
+      }}
+    />
   );
 }

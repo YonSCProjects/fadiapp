@@ -35,11 +35,15 @@ import {
 } from '@/db/repos/lessonInstances';
 import type { LessonBlock } from '@/db/schema';
 import { he } from '@/i18n/he';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 
 const TICK_MS = 250;
 
 export default function RunnerScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { instanceId } = useLocalSearchParams<{ instanceId: string }>();
   const [state, setState] = useState<RunnerState | null>(null);
   const [deviations, setDeviations] = useState<RunnerDeviation[]>([]);
@@ -293,17 +297,26 @@ export default function RunnerScreen() {
           <View style={styles.controls}>
             <View style={styles.mainRow}>
               {running ? (
-                <Btn label={he.runner.pause} onPress={onPause} primary />
+                <Btn label={he.runner.pause} onPress={onPause} primary styles={styles} />
               ) : (
-                <Btn label={elapsedS > 0 ? he.runner.resume : he.runner.start} onPress={onStartOrResume} primary />
+                <Btn
+                  label={elapsedS > 0 ? he.runner.resume : he.runner.start}
+                  onPress={onStartOrResume}
+                  primary
+                  styles={styles}
+                />
               )}
             </View>
             <View style={styles.secondaryRow}>
-              <Btn label={he.runner.extend} onPress={onExtend} />
-              <Btn label={he.runner.skip} onPress={onSkip} />
-              <Btn label={he.runner.deviate} onPress={() => setDeviationSheet(true)} />
+              <Btn label={he.runner.extend} onPress={onExtend} styles={styles} />
+              <Btn label={he.runner.skip} onPress={onSkip} styles={styles} />
+              <Btn
+                label={he.runner.deviate}
+                onPress={() => setDeviationSheet(true)}
+                styles={styles}
+              />
             </View>
-            <Btn label={he.runner.end} onPress={onEnd} danger />
+            <Btn label={he.runner.end} onPress={onEnd} danger styles={styles} />
           </View>
         )}
 
@@ -313,6 +326,7 @@ export default function RunnerScreen() {
               label={he.runner.backToLessons}
               onPress={() => router.replace('/lessons' as never)}
               primary
+              styles={styles}
             />
           </View>
         )}
@@ -327,12 +341,25 @@ export default function RunnerScreen() {
         <Pressable style={styles.backdrop} onPress={() => setDeviationSheet(false)}>
           <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
             <Text style={styles.sheetTitle}>{he.runner.deviate}</Text>
-            <Btn label={he.runner.waterBreak} onPress={() => logDeviation('water_break')} />
-            <Btn label={he.runner.injuryPause} onPress={() => logDeviation('injury_pause')} />
-            <Btn label={he.runner.substituted} onPress={() => logDeviation('substituted')} />
+            <Btn
+              label={he.runner.waterBreak}
+              onPress={() => logDeviation('water_break')}
+              styles={styles}
+            />
+            <Btn
+              label={he.runner.injuryPause}
+              onPress={() => logDeviation('injury_pause')}
+              styles={styles}
+            />
+            <Btn
+              label={he.runner.substituted}
+              onPress={() => logDeviation('substituted')}
+              styles={styles}
+            />
             <Btn
               label={he.lessons.cancel}
               onPress={() => setDeviationSheet(false)}
+              styles={styles}
             />
           </Pressable>
         </Pressable>
@@ -341,25 +368,25 @@ export default function RunnerScreen() {
   );
 }
 
+type S = ReturnType<typeof createStyles>;
+
 function Btn({
   label,
   onPress,
   primary,
   danger,
+  styles,
 }: {
   label: string;
   onPress: () => void;
   primary?: boolean;
   danger?: boolean;
+  styles: S;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      style={[
-        styles.btn,
-        primary && styles.btnPrimary,
-        danger && styles.btnDanger,
-      ]}
+      style={[styles.btn, primary && styles.btnPrimary, danger && styles.btnDanger]}
     >
       <Text
         style={[
@@ -383,53 +410,85 @@ function pad(n: number): string {
   return n < 10 ? `0${n}` : `${n}`;
 }
 
-const styles = StyleSheet.create({
-  loading: { flex: 1, backgroundColor: '#0a0a10' },
-  screen: { flex: 1, backgroundColor: '#0a0a10', padding: 20, gap: 16 },
-  topMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  stepLabel: { color: '#a0a0a8', fontSize: 14 },
-  finishedLabel: { color: '#86efac', fontSize: 14, fontWeight: '700' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  blockNameLabel: { color: '#6a6a72', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  blockName: { color: '#f5f5f5', fontSize: 32, fontWeight: '700', textAlign: 'center' },
-  timer: {
-    color: '#f5f5f5',
-    fontSize: 128,
-    fontVariant: ['tabular-nums'],
-    fontWeight: '200',
-    textAlign: 'center',
-    marginVertical: 8,
-  },
-  elapsedLabel: { color: '#6a6a72', fontSize: 14, fontVariant: ['tabular-nums'] },
-  nextBox: {
-    marginTop: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: '#16161c',
-    borderWidth: 1,
-    borderColor: '#1f1f28',
-    alignItems: 'center',
-    gap: 4,
-  },
-  nextLabel: { color: '#6a6a72', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
-  nextName: { color: '#c0c0c8', fontSize: 16, fontWeight: '500' },
-  controls: { gap: 10 },
-  mainRow: { flexDirection: 'row', gap: 8 },
-  secondaryRow: { flexDirection: 'row', gap: 8 },
-  btn: {
-    flex: 1,
-    backgroundColor: '#1a1a20',
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  btnPrimary: { backgroundColor: '#3b82f6' },
-  btnDanger: { borderWidth: 1, borderColor: '#4a1a1a', backgroundColor: 'transparent' },
-  btnLabel: { color: '#f5f5f5', fontSize: 16, fontWeight: '600' },
-  btnLabelPrimary: { color: '#fff' },
-  btnLabelDanger: { color: '#ff8a8a' },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: '#16161c', padding: 20, gap: 10, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  sheetTitle: { color: '#f5f5f5', fontSize: 16, fontWeight: '700', marginBottom: 4, textAlign: 'center' },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    loading: { flex: 1, backgroundColor: theme.bg.runner },
+    screen: { flex: 1, backgroundColor: theme.bg.runner, padding: 20, gap: 16 },
+    topMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    stepLabel: { color: theme.text.muted, fontSize: 14 },
+    finishedLabel: { color: theme.status.success, fontSize: 14, fontWeight: '700' },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
+    blockNameLabel: {
+      color: theme.text.faint,
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    blockName: {
+      color: theme.text.primary,
+      fontSize: 32,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    timer: {
+      color: theme.text.primary,
+      fontSize: 128,
+      fontVariant: ['tabular-nums'],
+      fontWeight: '200',
+      textAlign: 'center',
+      marginVertical: 8,
+    },
+    elapsedLabel: { color: theme.text.faint, fontSize: 14, fontVariant: ['tabular-nums'] },
+    nextBox: {
+      marginTop: 24,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 10,
+      backgroundColor: theme.bg.subtle,
+      borderWidth: 1,
+      borderColor: theme.border.subtle,
+      alignItems: 'center',
+      gap: 4,
+    },
+    nextLabel: {
+      color: theme.text.faint,
+      fontSize: 11,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    nextName: { color: theme.text.secondary, fontSize: 16, fontWeight: '500' },
+    controls: { gap: 10 },
+    mainRow: { flexDirection: 'row', gap: 8 },
+    secondaryRow: { flexDirection: 'row', gap: 8 },
+    btn: {
+      flex: 1,
+      backgroundColor: theme.bg.card,
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    btnPrimary: { backgroundColor: theme.accent.primary },
+    btnDanger: {
+      borderWidth: 1,
+      borderColor: theme.status.dangerBorder,
+      backgroundColor: 'transparent',
+    },
+    btnLabel: { color: theme.text.primary, fontSize: 16, fontWeight: '600' },
+    btnLabelPrimary: { color: theme.accent.primaryText },
+    btnLabelDanger: { color: theme.status.danger },
+    backdrop: { flex: 1, backgroundColor: theme.bg.overlay, justifyContent: 'flex-end' },
+    sheet: {
+      backgroundColor: theme.bg.subtle,
+      padding: 20,
+      gap: 10,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+    },
+    sheetTitle: {
+      color: theme.text.primary,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 4,
+      textAlign: 'center',
+    },
+  });

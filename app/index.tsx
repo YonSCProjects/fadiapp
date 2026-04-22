@@ -1,9 +1,14 @@
+import { useMemo } from 'react';
 import { Link, Stack } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 
 export default function Home() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const bottomPad = useBottomInset();
   return (
     <>
@@ -13,24 +18,39 @@ export default function Home() {
         <Text style={styles.subtitle}>{he.home.subtitle}</Text>
 
         <View style={styles.section}>
-          <Card href="/(designer)" label={he.home.designerCta} />
-          <Card href="/lessons" label={he.home.lessonsCta} />
-          <Card href="/lessons" label={he.home.runnerCta} />
-          <Card href="/(docs)" label={he.home.docsCta} disabled />
+          <Card href="/(designer)" label={he.home.designerCta} theme={theme} />
+          <Card href="/lessons" label={he.home.lessonsCta} theme={theme} />
+          <Card href="/lessons" label={he.home.runnerCta} theme={theme} />
+          <Card href="/(docs)" label={he.home.docsCta} theme={theme} disabled />
+        </View>
+
+        <View style={styles.section}>
+          <Card href="/settings" label={he.home.settingsCta} theme={theme} />
         </View>
 
         <Text style={styles.sectionHeader}>{he.home.spikesHeader}</Text>
         <View style={styles.section}>
-          <Card href="/spike/rtl" label={he.home.rtlSpike} />
-          <Card href="/spike/timer" label={he.home.timerSpike} />
-          <Card href="/spike/drive" label={he.home.driveSpike} />
+          <Card href="/spike/rtl" label={he.home.rtlSpike} theme={theme} />
+          <Card href="/spike/timer" label={he.home.timerSpike} theme={theme} />
+          <Card href="/spike/drive" label={he.home.driveSpike} theme={theme} />
         </View>
       </ScrollView>
     </>
   );
 }
 
-function Card({ href, label, disabled }: { href: string; label: string; disabled?: boolean }) {
+function Card({
+  href,
+  label,
+  disabled,
+  theme,
+}: {
+  href: string;
+  label: string;
+  disabled?: boolean;
+  theme: ThemeTokens;
+}) {
+  const styles = useMemo(() => createStyles(theme), [theme]);
   if (disabled) {
     return (
       <View style={[styles.card, styles.cardDisabled]}>
@@ -48,28 +68,29 @@ function Card({ href, label, disabled }: { href: string; label: string; disabled
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 20, gap: 12 },
-  title: { color: '#f5f5f5', fontSize: 28, fontWeight: '700' },
-  subtitle: { color: '#a0a0a8', fontSize: 16, marginBottom: 8 },
-  sectionHeader: {
-    color: '#a0a0a8',
-    fontSize: 14,
-    marginTop: 16,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  section: { gap: 8 },
-  card: {
-    backgroundColor: '#23232a',
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  cardDisabled: { opacity: 0.5 },
-  cardLabel: { color: '#f5f5f5', fontSize: 18, fontWeight: '600' },
-  cardSoon: { color: '#a0a0a8', fontSize: 12 },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    container: { flex: 1 },
+    content: { padding: 20, gap: 12 },
+    title: { color: theme.text.primary, fontSize: 28, fontWeight: '700' },
+    subtitle: { color: theme.text.muted, fontSize: 16, marginBottom: 8 },
+    sectionHeader: {
+      color: theme.text.muted,
+      fontSize: 14,
+      marginTop: 16,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    section: { gap: 8 },
+    card: {
+      backgroundColor: theme.bg.input,
+      padding: 16,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    cardDisabled: { opacity: 0.5 },
+    cardLabel: { color: theme.text.primary, fontSize: 18, fontWeight: '600' },
+    cardSoon: { color: theme.text.muted, fontSize: 12 },
+  });

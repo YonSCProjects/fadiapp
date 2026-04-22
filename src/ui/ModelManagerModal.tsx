@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { he } from '@/i18n/he';
 import type { PedagogicalModel } from '@/db/schema';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 
 // All pedagogy-card keys from assets/kb/pedagogy_cards.json. The 5 non-Mosston
 // plus the meta "mosston-spectrum". Kept here rather than derived to avoid
@@ -25,6 +27,8 @@ type Props = {
 
 export function ModelManagerModal({ visible, disabled, onClose, onSave }: Props) {
   const [disabledSet, setDisabledSet] = useState<Set<string>>(new Set());
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     if (visible) setDisabledSet(new Set(disabled));
@@ -76,55 +80,62 @@ export function ModelManagerModal({ visible, disabled, onClose, onSave }: Props)
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f10', paddingTop: 24 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a20',
-  },
-  title: { color: '#f5f5f5', fontSize: 20, fontWeight: '700' },
-  close: { color: '#a0a0a8', fontSize: 32, lineHeight: 32 },
-  subtitle: { color: '#a0a0a8', fontSize: 14, paddingHorizontal: 20, paddingTop: 12, lineHeight: 20 },
-  listScroll: { flex: 1 },
-  list: { padding: 20, gap: 8 },
-  row: {
-    backgroundColor: '#1a1a20',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  rowName: { color: '#f5f5f5', fontSize: 16, flex: 1 },
-  toggle: {
-    width: 46,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#2a2a32',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-  },
-  toggleOn: { backgroundColor: '#3b82f6' },
-  toggleKnob: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#6a6a72',
-  },
-  toggleKnobOn: { backgroundColor: '#ffffff', alignSelf: 'flex-end' },
-  primaryBtn: {
-    backgroundColor: '#3b82f6',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    margin: 20,
-  },
-  primaryBtnLabel: { color: '#fff', fontSize: 16, fontWeight: '600' },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg.modal, paddingTop: 24 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border.subtle,
+    },
+    title: { color: theme.text.primary, fontSize: 20, fontWeight: '700' },
+    close: { color: theme.text.muted, fontSize: 32, lineHeight: 32 },
+    subtitle: {
+      color: theme.text.muted,
+      fontSize: 14,
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      lineHeight: 20,
+    },
+    listScroll: { flex: 1 },
+    list: { padding: 20, gap: 8 },
+    row: {
+      backgroundColor: theme.bg.card,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      borderRadius: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    rowName: { color: theme.text.primary, fontSize: 16, flex: 1 },
+    toggle: {
+      width: 46,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: theme.border.default,
+      justifyContent: 'center',
+      paddingHorizontal: 3,
+    },
+    toggleOn: { backgroundColor: theme.accent.primary },
+    toggleKnob: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: theme.text.faint,
+    },
+    toggleKnobOn: { backgroundColor: theme.accent.primaryText, alignSelf: 'flex-end' },
+    primaryBtn: {
+      backgroundColor: theme.accent.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+      margin: 20,
+    },
+    primaryBtnLabel: { color: theme.accent.primaryText, fontSize: 16, fontWeight: '600' },
+  });

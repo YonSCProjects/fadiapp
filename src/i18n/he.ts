@@ -8,6 +8,7 @@ export const he = {
     runnerCta: 'הפעל שיעור',
     runnerSubtitle: 'בחר שיעור קיים כדי להתחיל',
     docsCta: 'תיעוד שיעור',
+    settingsCta: 'הגדרות',
     spikesHeader: 'בדיקות פיתוח',
     rtlSpike: 'בדיקת RTL בעברית',
     timerSpike: 'בדיקת טיימר רקע',
@@ -48,6 +49,11 @@ export const he = {
     gameCat: 'משחק',
     fitnessCat: 'כושר',
     cooldownCat: 'שחרור',
+  },
+  settings: {
+    title: 'הגדרות',
+    themeLabel: 'ערכת צבעים',
+    themeSubtitle: 'בחר את המראה המועדף עליך. ניתן לשנות בכל עת.',
   },
   runner: {
     title: 'שיעור פועל',

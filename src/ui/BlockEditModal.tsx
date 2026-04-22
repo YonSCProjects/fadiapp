@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import type { Activity, LessonBlock } from '@/db/schema';
 import { he } from '@/i18n/he';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 import { ActivityPickerModal } from './ActivityPickerModal';
 
 type Props = {
@@ -37,6 +39,8 @@ export function BlockEditModal({
   const [notes, setNotes] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null); // null = add
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     if (block) {
@@ -107,7 +111,7 @@ export function BlockEditModal({
         </View>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Field label={he.lessons.blockName}>
+          <Field styles={styles} label={he.lessons.blockName}>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -116,7 +120,7 @@ export function BlockEditModal({
             />
           </Field>
 
-          <Field label={he.lessons.blockDuration}>
+          <Field styles={styles} label={he.lessons.blockDuration}>
             <View style={styles.durationRow}>
               <Pressable
                 style={styles.stepBtn}
@@ -143,7 +147,7 @@ export function BlockEditModal({
             </View>
           </Field>
 
-          <Field label={he.lessons.blockActivities}>
+          <Field styles={styles} label={he.lessons.blockActivities}>
             <View style={styles.activitiesList}>
               {activityIds.map((id, idx) => (
                 <View key={`${id}-${idx}`} style={styles.activityRow}>
@@ -177,7 +181,7 @@ export function BlockEditModal({
             </View>
           </Field>
 
-          <Field label={he.lessons.blockCues}>
+          <Field styles={styles} label={he.lessons.blockCues}>
             <TextInput
               value={cues}
               onChangeText={setCues}
@@ -187,7 +191,7 @@ export function BlockEditModal({
             />
           </Field>
 
-          <Field label={he.lessons.blockNotes}>
+          <Field styles={styles} label={he.lessons.blockNotes}>
             <TextInput
               value={notes}
               onChangeText={setNotes}
@@ -217,7 +221,17 @@ export function BlockEditModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+type S = ReturnType<typeof createStyles>;
+
+function Field({
+  label,
+  children,
+  styles,
+}: {
+  label: string;
+  children: React.ReactNode;
+  styles: S;
+}) {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -226,75 +240,76 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f10', paddingTop: 24 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a20',
-  },
-  title: { color: '#f5f5f5', fontSize: 20, fontWeight: '700' },
-  close: { color: '#a0a0a8', fontSize: 32, lineHeight: 32 },
-  content: { padding: 20, gap: 14, paddingBottom: 60 },
-  field: { gap: 8 },
-  fieldLabel: { color: '#a0a0a8', fontSize: 14 },
-  input: {
-    backgroundColor: '#23232a',
-    color: '#f5f5f5',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  durationRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  durationInput: { flex: 1, textAlign: 'center', fontSize: 20 },
-  stepBtn: {
-    backgroundColor: '#23232a',
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepBtnLabel: { color: '#f5f5f5', fontSize: 24, fontWeight: '500' },
-  activitiesList: { gap: 8 },
-  activityRow: {
-    backgroundColor: '#1a1a20',
-    padding: 12,
-    borderRadius: 8,
-    gap: 6,
-  },
-  activityName: { color: '#f5f5f5', fontSize: 16 },
-  activityActions: { flexDirection: 'row', gap: 16 },
-  activityAction: { color: '#3b82f6', fontSize: 13 },
-  activityActionRemove: { color: '#ff8a8a' },
-  addActivityBtn: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#3b82f6',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-  },
-  addActivityLabel: { color: '#3b82f6', fontSize: 14 },
-  primaryBtn: {
-    backgroundColor: '#3b82f6',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  primaryBtnLabel: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  dangerBtn: {
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#4a1a1a',
-    alignItems: 'center',
-  },
-  dangerBtnLabel: { color: '#ff8a8a', fontSize: 16, fontWeight: '600' },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg.modal, paddingTop: 24 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border.subtle,
+    },
+    title: { color: theme.text.primary, fontSize: 20, fontWeight: '700' },
+    close: { color: theme.text.muted, fontSize: 32, lineHeight: 32 },
+    content: { padding: 20, gap: 14, paddingBottom: 60 },
+    field: { gap: 8 },
+    fieldLabel: { color: theme.text.muted, fontSize: 14 },
+    input: {
+      backgroundColor: theme.bg.input,
+      color: theme.text.primary,
+      padding: 12,
+      borderRadius: 8,
+      fontSize: 16,
+    },
+    textarea: { minHeight: 80, textAlignVertical: 'top' },
+    durationRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+    durationInput: { flex: 1, textAlign: 'center', fontSize: 20 },
+    stepBtn: {
+      backgroundColor: theme.bg.input,
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stepBtnLabel: { color: theme.text.primary, fontSize: 24, fontWeight: '500' },
+    activitiesList: { gap: 8 },
+    activityRow: {
+      backgroundColor: theme.bg.card,
+      padding: 12,
+      borderRadius: 8,
+      gap: 6,
+    },
+    activityName: { color: theme.text.primary, fontSize: 16 },
+    activityActions: { flexDirection: 'row', gap: 16 },
+    activityAction: { color: theme.accent.link, fontSize: 13 },
+    activityActionRemove: { color: theme.status.danger },
+    addActivityBtn: {
+      padding: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.accent.primary,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+    },
+    addActivityLabel: { color: theme.accent.link, fontSize: 14 },
+    primaryBtn: {
+      backgroundColor: theme.accent.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    primaryBtnLabel: { color: theme.accent.primaryText, fontSize: 16, fontWeight: '600' },
+    dangerBtn: {
+      padding: 14,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.status.dangerBorder,
+      alignItems: 'center',
+    },
+    dangerBtnLabel: { color: theme.status.danger, fontSize: 16, fontWeight: '600' },
+  });

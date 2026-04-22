@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { inArray, isNull, and } from 'drizzle-orm';
@@ -12,9 +12,13 @@ import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { BlockEditModal } from '@/ui/BlockEditModal';
 import { AddBlockModal } from '@/ui/AddBlockModal';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { ThemeTokens } from '@/theme/tokens';
 
 export default function LessonDetail() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const [lesson, setLesson] = useState<Lesson | null | 'missing'>(null);
   const [whitelist, setWhitelist] = useState<Activity[]>([]);
@@ -150,50 +154,53 @@ export default function LessonDetail() {
           <Text style={styles.lessonGoal}>{lesson.goal_he}</Text>
 
           {lesson.pedagogical_rationale_he && lesson.pedagogical_rationale_he.length > 0 && (
-            <Section label={he.designer.rationale}>
+            <Section label={he.designer.rationale} styles={styles}>
               <Text style={styles.bodyText}>{lesson.pedagogical_rationale_he}</Text>
             </Section>
           )}
 
           {warmup.length > 0 && (
-            <Section label={he.designer.warmup}>
+            <Section label={he.designer.warmup} styles={styles}>
               {warmup.map((b) => (
                 <BlockCard
                   key={b.id}
                   block={b}
                   idToName={idToName}
                   onPress={() => setEditingBlock(b)}
+                  styles={styles}
                 />
               ))}
             </Section>
           )}
           {main.length > 0 && (
-            <Section label={he.designer.main}>
+            <Section label={he.designer.main} styles={styles}>
               {main.map((b) => (
                 <BlockCard
                   key={b.id}
                   block={b}
                   idToName={idToName}
                   onPress={() => setEditingBlock(b)}
+                  styles={styles}
                 />
               ))}
             </Section>
           )}
           {cooldown.length > 0 && (
-            <Section label={he.designer.cooldown}>
+            <Section label={he.designer.cooldown} styles={styles}>
               {cooldown.map((b) => (
                 <BlockCard
                   key={b.id}
                   block={b}
                   idToName={idToName}
                   onPress={() => setEditingBlock(b)}
+                  styles={styles}
                 />
               ))}
             </Section>
           )}
 
           {lesson.safety_notes_he && lesson.safety_notes_he.length > 0 && (
-            <Section label={he.designer.safetyNotes}>
+            <Section label={he.designer.safetyNotes} styles={styles}>
               {lesson.safety_notes_he.map((note, i) => (
                 <Text key={i} style={styles.safetyNote}>
                   • {note}
@@ -235,14 +242,18 @@ export default function LessonDetail() {
   );
 }
 
+type S = ReturnType<typeof createStyles>;
+
 function BlockCard({
   block,
   idToName,
   onPress,
+  styles,
 }: {
   block: LessonBlock;
   idToName: Map<string, string>;
   onPress: () => void;
+  styles: S;
 }) {
   const minutes = Math.round(block.duration_s / 60);
   return (
@@ -263,7 +274,15 @@ function BlockCard({
   );
 }
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+function Section({
+  label,
+  children,
+  styles,
+}: {
+  label: string;
+  children: React.ReactNode;
+  styles: S;
+}) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionLabel}>{label}</Text>
@@ -272,65 +291,76 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  container: { flex: 1 },
-  content: { padding: 20, gap: 12 },
-  missing: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  missingText: { color: '#a0a0a8', fontSize: 16 },
-  lessonTitle: { color: '#f5f5f5', fontSize: 24, fontWeight: '700' },
-  lessonMeta: { color: '#a0a0a8', fontSize: 12 },
-  lessonGoal: { color: '#e0e0e8', fontSize: 16, lineHeight: 22 },
-  section: { gap: 8, marginTop: 12 },
-  sectionLabel: { color: '#a0a0a8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  block: {
-    backgroundColor: '#1a1a20',
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2a2a32',
-    gap: 6,
-  },
-  blockHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  blockName: { color: '#f5f5f5', fontSize: 16, fontWeight: '600' },
-  blockDuration: { color: '#a0a0a8', fontSize: 14 },
-  blockActivities: { color: '#c0c0c8', fontSize: 14 },
-  blockCues: { color: '#86efac', fontSize: 13, fontStyle: 'italic' },
-  blockNotes: { color: '#a0a0a8', fontSize: 13 },
-  safetyNote: { color: '#fbbf24', fontSize: 14, lineHeight: 20 },
-  bodyText: { color: '#e0e0e8', fontSize: 14, lineHeight: 20 },
-  startBtn: {
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 10,
-    backgroundColor: '#16a34a',
-    alignItems: 'center',
-  },
-  startLabel: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  deleteBtn: {
-    marginTop: 12,
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#4a1a1a',
-    alignItems: 'center',
-  },
-  deleteLabel: { color: '#ff8a8a', fontSize: 16, fontWeight: '600' },
-  fab: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#3b82f6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  fabLabel: { color: '#fff', fontSize: 32, lineHeight: 34, fontWeight: '300' },
-});
+const createStyles = (theme: ThemeTokens) =>
+  StyleSheet.create({
+    root: { flex: 1 },
+    container: { flex: 1 },
+    content: { padding: 20, gap: 12 },
+    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    missingText: { color: theme.text.muted, fontSize: 16 },
+    lessonTitle: { color: theme.text.primary, fontSize: 24, fontWeight: '700' },
+    lessonMeta: { color: theme.text.muted, fontSize: 12 },
+    lessonGoal: { color: theme.text.secondary, fontSize: 16, lineHeight: 22 },
+    section: { gap: 8, marginTop: 12 },
+    sectionLabel: {
+      color: theme.text.muted,
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    block: {
+      backgroundColor: theme.bg.card,
+      padding: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.border.default,
+      gap: 6,
+    },
+    blockHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+    blockName: { color: theme.text.primary, fontSize: 16, fontWeight: '600' },
+    blockDuration: { color: theme.text.muted, fontSize: 14 },
+    blockActivities: { color: theme.text.secondary, fontSize: 14 },
+    blockCues: { color: theme.status.success, fontSize: 13, fontStyle: 'italic' },
+    blockNotes: { color: theme.text.muted, fontSize: 13 },
+    safetyNote: { color: theme.status.warning, fontSize: 14, lineHeight: 20 },
+    bodyText: { color: theme.text.secondary, fontSize: 14, lineHeight: 20 },
+    startBtn: {
+      marginTop: 24,
+      padding: 16,
+      borderRadius: 10,
+      backgroundColor: theme.status.successStrong,
+      alignItems: 'center',
+    },
+    startLabel: { color: theme.text.onAccent, fontSize: 18, fontWeight: '700' },
+    deleteBtn: {
+      marginTop: 12,
+      padding: 14,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.status.dangerBorder,
+      alignItems: 'center',
+    },
+    deleteLabel: { color: theme.status.danger, fontSize: 16, fontWeight: '600' },
+    fab: {
+      position: 'absolute',
+      bottom: 32,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.accent.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 8,
+    },
+    fabLabel: {
+      color: theme.accent.primaryText,
+      fontSize: 32,
+      lineHeight: 34,
+      fontWeight: '300',
+    },
+  });
