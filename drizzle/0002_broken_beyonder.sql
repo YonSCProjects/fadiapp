@@ -1,0 +1,1 @@
+ALTER TABLE `lessons` ADD `user_goal_he` text;

@@ -169,6 +169,10 @@ export const lessons = sqliteTable(
     grade_band: text('grade_band').notNull(), // '7-9' | '10-12' | etc.
     duration_min: integer('duration_min').notNull(),
     goal_he: text('goal_he').notNull(),
+    // The teacher's original typed goal, before the LLM polished it. Used
+    // by autofill suggestions in the designer — teachers want to see what
+    // they typed last time, not the LLM's rewrite.
+    user_goal_he: text('user_goal_he'),
     equipment_json: text('equipment_json', { mode: 'json' }).$type<string[]>(),
     environment: text('environment').$type<ActivityEnvironment>().notNull().default('gym'),
     pedagogical_model: text('pedagogical_model').$type<PedagogicalModel>(),

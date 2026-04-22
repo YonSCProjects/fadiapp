@@ -49,15 +49,19 @@ export async function softDeleteLesson(id: string): Promise<void> {
 }
 
 export async function getRecentDistinctGoals(limit = 8): Promise<string[]> {
+  // Reads user-typed goals only (user_goal_he). Ignores LLM-polished goal_he
+  // so the autofill surfaces what the teacher actually typed last time, not
+  // the designer's rewrite. Rows created before this column existed return
+  // NULL for user_goal_he and are skipped.
   const rows = await db
-    .select({ goal_he: lessons.goal_he, updated_at: lessons.updated_at })
+    .select({ user_goal_he: lessons.user_goal_he, updated_at: lessons.updated_at })
     .from(lessons)
     .where(isNull(lessons.deleted_at))
     .orderBy(desc(lessons.updated_at));
   const seen = new Set<string>();
   const out: string[] = [];
   for (const r of rows) {
-    const g = (r.goal_he ?? '').trim();
+    const g = (r.user_goal_he ?? '').trim();
     if (!g || seen.has(g)) continue;
     seen.add(g);
     out.push(g);

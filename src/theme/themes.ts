@@ -1,138 +1,144 @@
 import type { ThemeTokens } from './tokens';
 
-// Current dark scheme preserved as the default. Matches every hex literal
-// that was inline across the app before the theming refactor.
+// Three soft / pastel palettes. The bg.* values are intentionally separated
+// enough that a teacher can see the difference between app / card / input in
+// the swatch preview on the settings screen — previous pass had three near-
+// whites on the light theme that read as identical.
+
+// Soft dark — charcoal with a faint blue lift, pastel-blue accent.
 export const slate: ThemeTokens = {
   name: 'slate',
-  nameHe: 'כהה',
+  nameHe: 'כהה רך',
   mode: 'dark',
   bg: {
-    app: '#0f0f10',
-    runner: '#0a0a10',
-    card: '#1a1a20',
-    input: '#23232a',
-    modal: '#0f0f10',
-    subtle: '#16161c',
-    overlay: 'rgba(0,0,0,0.6)',
+    app: '#15171e',
+    runner: '#0f1117',
+    card: '#20232d',
+    input: '#2a2e3a',
+    modal: '#15171e',
+    subtle: '#1a1d26',
+    overlay: 'rgba(0,0,0,0.55)',
   },
   border: {
-    default: '#2a2a32',
-    subtle: '#1a1a20',
+    default: '#323644',
+    subtle: '#1f222c',
   },
   text: {
-    primary: '#f5f5f5',
-    secondary: '#c0c0c8',
-    muted: '#a0a0a8',
-    faint: '#6a6a72',
-    onAccent: '#ffffff',
+    primary: '#e8eaf2',
+    secondary: '#c2c7d4',
+    muted: '#9297a7',
+    faint: '#686d7d',
+    onAccent: '#0f1117',
   },
   accent: {
-    primary: '#3b82f6',
-    primaryText: '#ffffff',
-    link: '#3b82f6',
+    primary: '#88a8ef', // soft periwinkle blue, not saturated
+    primaryText: '#0f1117',
+    link: '#a3bdf3',
   },
   status: {
-    success: '#86efac',
-    successStrong: '#16a34a',
-    warning: '#fbbf24',
-    warningBg: '#3a2a18',
-    warningText: '#f5d094',
-    danger: '#ff8a8a',
-    dangerBorder: '#4a1a1a',
+    success: '#9fd6b0',
+    successStrong: '#6eb584',
+    warning: '#f0cd86',
+    warningBg: '#3a2e1c',
+    warningText: '#f5d99a',
+    danger: '#ed9b9b',
+    dangerBorder: '#5c3434',
   },
   header: {
-    bg: '#1a1a1a',
-    tint: '#f5f5f5',
+    bg: '#1a1d26',
+    tint: '#e8eaf2',
   },
 };
 
-// Classic light — professional, high readability indoors.
+// Warm cream — off-white with peach and terracotta. No cool grays; no pure
+// black text. bg.app is cream, bg.card is white (lifts above the bg), bg.input
+// is visibly peach-tinted so the three backgrounds look like three things.
 export const daylight: ThemeTokens = {
   name: 'daylight',
-  nameHe: 'בהיר',
+  nameHe: 'קרם בהיר',
   mode: 'light',
   bg: {
-    app: '#fafafa',
+    app: '#fbf3e6',     // warm cream
     runner: '#ffffff',
-    card: '#ffffff',
-    input: '#f0f0f3',
-    modal: '#fafafa',
-    subtle: '#f4f4f5',
-    overlay: 'rgba(0,0,0,0.35)',
+    card: '#ffffff',    // white floats above cream
+    input: '#f2e3c7',   // clearly peach-tinted
+    modal: '#fbf3e6',
+    subtle: '#f6ebd4',
+    overlay: 'rgba(60,40,20,0.28)',
   },
   border: {
-    default: '#d6d6da',
-    subtle: '#ececf0',
+    default: '#d9c7a3',
+    subtle: '#ebd9b8',
   },
   text: {
-    primary: '#18181b',
-    secondary: '#3f3f46',
-    muted: '#6a6a72',
-    faint: '#9a9aa2',
+    primary: '#3f2f1c',  // warm dark brown
+    secondary: '#6e5a3e',
+    muted: '#96805f',
+    faint: '#b8a582',
     onAccent: '#ffffff',
   },
   accent: {
-    primary: '#2563eb',
+    primary: '#c97a52', // soft terracotta
     primaryText: '#ffffff',
-    link: '#1d4ed8',
+    link: '#a66035',
   },
   status: {
-    success: '#16a34a',
-    successStrong: '#15803d',
-    warning: '#d97706',
-    warningBg: '#fef3c7',
-    warningText: '#92400e',
-    danger: '#dc2626',
-    dangerBorder: '#fecaca',
+    success: '#7fa66c',      // sage
+    successStrong: '#6c8f5a',
+    warning: '#d49644',      // soft amber
+    warningBg: '#f7e4bb',
+    warningText: '#7a4f14',
+    danger: '#c26a6a',       // dusty rose
+    dangerBorder: '#eac4c4',
   },
   header: {
     bg: '#ffffff',
-    tint: '#18181b',
+    tint: '#3f2f1c',
   },
 };
 
-// Mediterranean — evokes Israeli coast. Deep navy with warm sand accents.
+// Mediterranean — softer navy (not black) with pastel sand and mint accents.
 export const mediterranean: ThemeTokens = {
   name: 'mediterranean',
   nameHe: 'ים תיכוני',
   mode: 'dark',
   bg: {
-    app: '#0b1e33',
-    runner: '#081423',
-    card: '#132e4b',
-    input: '#1c3f63',
-    modal: '#0b1e33',
-    subtle: '#0f263f',
-    overlay: 'rgba(0,0,0,0.5)',
+    app: '#1f3954',     // softer navy
+    runner: '#183049',
+    card: '#2f4e70',
+    input: '#3c6389',
+    modal: '#1f3954',
+    subtle: '#284566',
+    overlay: 'rgba(8,16,28,0.5)',
   },
   border: {
-    default: '#234a73',
-    subtle: '#133050',
+    default: '#4a6e94',
+    subtle: '#294768',
   },
   text: {
-    primary: '#eef3fa',
-    secondary: '#c3d0e1',
-    muted: '#8ca1bd',
-    faint: '#5e7899',
-    onAccent: '#0b1e33',
+    primary: '#ebf0f7',
+    secondary: '#c9d4e2',
+    muted: '#9bafc6',
+    faint: '#6e829a',
+    onAccent: '#1f3954',
   },
   accent: {
-    primary: '#f5a623', // warm sand against navy
-    primaryText: '#0b1e33',
-    link: '#f5a623',
+    primary: '#f5c791',   // pastel sand, less saturated than the previous f5a623
+    primaryText: '#1f3954',
+    link: '#f5c791',
   },
   status: {
-    success: '#4ade80',
-    successStrong: '#22c55e',
-    warning: '#fb923c',
-    warningBg: '#3a2614',
-    warningText: '#fdba74',
-    danger: '#f87171',
-    dangerBorder: '#7f1d1d',
+    success: '#a9dabe',       // pastel mint
+    successStrong: '#85b89b',
+    warning: '#f2b380',       // pastel peach
+    warningBg: '#3a281a',
+    warningText: '#f5c791',
+    danger: '#ed9b9b',
+    dangerBorder: '#5c3434',
   },
   header: {
-    bg: '#081423',
-    tint: '#eef3fa',
+    bg: '#183049',
+    tint: '#ebf0f7',
   },
 };
 

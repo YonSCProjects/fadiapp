@@ -168,6 +168,9 @@ export default function DesignerHome() {
       grade_band: resolved.grade_band,
       duration_min: resolved.duration_min,
       goal_he: resolved.goal_he,
+      // Preserve the teacher's raw typed input for autofill; the polished
+      // goal_he above stays as the displayed/searchable goal.
+      user_goal_he: goalHe.trim() || null,
       equipment_json: resolved.equipment_json,
       environment: resolved.environment,
       pedagogical_model: resolved.pedagogical_model,
