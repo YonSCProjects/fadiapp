@@ -54,6 +54,8 @@ export const he = {
     title: 'הגדרות',
     themeLabel: 'ערכת צבעים',
     themeSubtitle: 'בחר את המראה המועדף עליך. ניתן לשנות בכל עת.',
+    aboutLabel: 'אודות',
+    versionLabel: 'גרסה',
   },
   runner: {
     title: 'שיעור פועל',

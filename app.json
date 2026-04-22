@@ -2,7 +2,7 @@
   "expo": {
     "name": "FadiApp",
     "slug": "fadiapp",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "orientation": "default",
     "scheme": "fadiapp",
     "userInterfaceStyle": "automatic",
@@ -20,6 +20,7 @@
     },
     "android": {
       "package": "il.fadiapp.app",
+      "versionCode": 1,
       "permissions": [
         "WAKE_LOCK",
         "VIBRATE",

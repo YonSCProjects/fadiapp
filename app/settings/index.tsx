@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
+import Constants from 'expo-constants';
 import { he } from '@/i18n/he';
 import { useTheme, useThemeSwitcher } from '@/theme/ThemeProvider';
 import type { ThemeTokens } from '@/theme/tokens';
@@ -11,6 +12,12 @@ export default function Settings() {
   const { themeName, setTheme, available } = useThemeSwitcher();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const bottomPad = useBottomInset();
+
+  const version = Constants.expoConfig?.version ?? '—';
+  const runtimeVersion =
+    typeof Constants.expoConfig?.runtimeVersion === 'string'
+      ? Constants.expoConfig.runtimeVersion
+      : null;
 
   return (
     <>
@@ -43,12 +50,31 @@ export default function Settings() {
                   <Swatch color={t.accent.primary} />
                   <Swatch color={t.text.primary} />
                 </View>
-                <Text style={[styles.themePreviewText, { color: t.text.primary, backgroundColor: t.bg.card }]}>
+                <Text
+                  style={[
+                    styles.themePreviewText,
+                    { color: t.text.primary, backgroundColor: t.bg.card },
+                  ]}
+                >
                   שיעור לדוגמה · כיתה ט׳ · 45 דקות
                 </Text>
               </Pressable>
             );
           })}
+        </View>
+
+        <Text style={[styles.sectionLabel, styles.aboutHeader]}>{he.settings.aboutLabel}</Text>
+        <View style={styles.aboutCard}>
+          <View style={styles.aboutRow}>
+            <Text style={styles.aboutKey}>{he.settings.versionLabel}</Text>
+            <Text style={styles.aboutValue}>{version}</Text>
+          </View>
+          {runtimeVersion && (
+            <View style={styles.aboutRow}>
+              <Text style={styles.aboutKey}>runtime</Text>
+              <Text style={styles.aboutValue}>{runtimeVersion}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </>
@@ -103,5 +129,26 @@ const createStyles = (theme: ThemeTokens) =>
       paddingHorizontal: 10,
       paddingVertical: 8,
       borderRadius: 6,
+    },
+    aboutHeader: { marginTop: 24 },
+    aboutCard: {
+      backgroundColor: theme.bg.card,
+      padding: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.border.default,
+      gap: 6,
+      marginTop: 8,
+    },
+    aboutRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    aboutKey: { color: theme.text.muted, fontSize: 14 },
+    aboutValue: {
+      color: theme.text.secondary,
+      fontSize: 14,
+      fontVariant: ['tabular-nums'],
     },
   });
