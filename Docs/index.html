@@ -36,8 +36,10 @@
   .hero h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 20px; background: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -2px; }
   .hero h2 { font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 400; color: #cbd5e1; margin-bottom: 40px; max-width: 700px; margin-right: auto; margin-left: auto; }
   .sports-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 40px; }
-  .sport-chip { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: white; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+  .sport-chip { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: white; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s; cursor: pointer; user-select: none; }
   .sport-chip:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .sport-chip.active { background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%); color: #1e293b; border-color: transparent; font-weight: 700; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(249,115,22,0.45); }
+  .story.filter-hidden { display: none; }
   .scroll-arrow { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: white; font-size: 2rem; animation: bounce 2s infinite; z-index: 2; cursor: pointer; }
   @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
   .intro { max-width: 850px; margin: 0 auto; padding: 100px 30px 60px; text-align: center; }
@@ -306,6 +308,24 @@
   document.querySelector('.scroll-arrow').addEventListener('click', () => { document.querySelector('.intro').scrollIntoView({ behavior: 'smooth' }); });
   const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.style.opacity = '1'; entry.target.style.transform = 'translateY(0)'; } }); }, { threshold: 0.1 });
   document.querySelectorAll('.story').forEach(story => { story.style.opacity = '0'; story.style.transform = 'translateY(40px)'; story.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out'; observer.observe(story); });
+
+  // Sport-chip filter: click to show only matching stories; click the active chip again to reset.
+  const chips = document.querySelectorAll('.sport-chip');
+  const stories = document.querySelectorAll('.story');
+  stories.forEach(s => { const t = s.querySelector('.sport-tag'); if (t) s.dataset.sport = t.textContent.trim(); });
+  chips.forEach(chip => {
+    const label = chip.textContent.trim().split(/\s+/).slice(1).join(' ');
+    chip.dataset.sport = label;
+    chip.addEventListener('click', () => {
+      const wasActive = chip.classList.contains('active');
+      chips.forEach(c => c.classList.remove('active'));
+      if (wasActive) { stories.forEach(s => s.classList.remove('filter-hidden')); return; }
+      chip.classList.add('active');
+      stories.forEach(s => { s.classList.toggle('filter-hidden', s.dataset.sport !== label); });
+      const first = document.querySelector('.story:not(.filter-hidden)');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 </script>
 </body>
 </html>
