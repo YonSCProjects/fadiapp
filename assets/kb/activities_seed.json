@@ -124,7 +124,7 @@
     },
     {
       "source_ref": "seed:volley-forearm-pairs",
-      "name_he": "מסירות מאמה בזוגות",
+      "name_he": "מסירות תחתונות בזוגות",
       "name_en": "Volleyball bump pairs",
       "category": "skill",
       "environment": "gym",
@@ -193,7 +193,7 @@
       "min_space_m2": 400,
       "tags_json": ["team-sport", "non-contact"],
       "difficulty": 3,
-      "cues_he": "אין ריצה עם הצלחת, מסירה תוך 10 שניות, נפילת צלחת = החלפת חזקה."
+      "cues_he": "אין ריצה עם הפריסבי, מסירה תוך 10 שניות, נפילת פריסבי = החלפת החזקה."
     },
     {
       "source_ref": "seed:capture-the-flag",
@@ -201,7 +201,7 @@
       "name_en": "Capture the flag",
       "category": "game",
       "environment": "gym",
-      "equipment_json": ["2 חפצים כ'דגלים'", "חגורות או סרטים"],
+      "equipment_json": ["2 דגלים (חפצים כלשהם)", "חגורות או סרטים"],
       "min_space_m2": 150,
       "tags_json": ["strategy", "team"],
       "difficulty": 2,
@@ -209,11 +209,11 @@
     },
     {
       "source_ref": "seed:dodgeball-mini",
-      "name_he": "כדור רודף מוגבל",
+      "name_he": "מחניים מצומצם",
       "name_en": "Mini dodgeball",
       "category": "game",
       "environment": "gym",
-      "equipment_json": ["כדורי קצף (לא קשים)"],
+      "equipment_json": ["כדורי קצף"],
       "min_space_m2": 100,
       "tags_json": ["reaction", "fun"],
       "difficulty": 2,

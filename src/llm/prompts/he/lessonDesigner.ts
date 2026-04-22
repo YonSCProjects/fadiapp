@@ -58,7 +58,7 @@ const JSON_SCHEMA_HINT = `{
     {
       "id": "string — מזהה ייחודי קצר באנגלית, לדוגמה 'warmup-1'",
       "phase": "warmup | main | cooldown",
-      "sub_phase": "raise | activate | mobilize | potentiate | undefined — רק לשלבי warmup לפי RAMP",
+      "sub_phase": "raise | activate | mobilize | potentiate — חובה בבלוקי warmup. בבלוקי main ו-cooldown: אל תכלול את השדה כלל (אל תכתוב null או undefined)",
       "name_he": "string — שם השלב בעברית",
       "duration_s": "number — משך השלב בשניות",
       "activity_ids": ["array of strings — חייבים להופיע ברשימת המזהים ברשימת הפעילויות שסופקה"],
@@ -145,6 +145,33 @@ ${buildActivitiesContext(activities)}
 החזר JSON בפורמט שהוגדר במערכת.`;
 }
 
+const ALLOWED_PEDAGOGICAL_MODELS: ReadonlySet<string> = new Set([
+  'tgfu',
+  'sport-education',
+  'tpsr',
+  'skill-themes',
+  'cooperative',
+  'mosston-spectrum',
+  'mosston-command',
+  'mosston-practice',
+  'mosston-reciprocal',
+  'mosston-self-check',
+  'mosston-inclusion',
+  'mosston-guided-discovery',
+  'mosston-convergent',
+  'mosston-divergent',
+  'mosston-individual',
+  'mosston-learner-initiated',
+  'mosston-self-teaching',
+]);
+
+const ALLOWED_SUB_PHASES: ReadonlySet<string> = new Set([
+  'raise',
+  'activate',
+  'mobilize',
+  'potentiate',
+]);
+
 export function parseLessonJson(raw: string): GeneratedLesson {
   // LLMs sometimes wrap JSON in markdown fences despite instructions. Be lenient.
   const stripped = raw
@@ -169,6 +196,24 @@ export function parseLessonJson(raw: string): GeneratedLesson {
   if (!obj.pedagogical_model) {
     throw new Error('lesson JSON missing pedagogical_model');
   }
+  if (!ALLOWED_PEDAGOGICAL_MODELS.has(obj.pedagogical_model)) {
+    throw new Error(
+      `lesson JSON pedagogical_model "${obj.pedagogical_model}" is not in the allowed set`,
+    );
+  }
+
+  // Defensive cleanup: the LLM sometimes writes sub_phase: "undefined" (string
+  // literal) for non-warmup blocks despite the prompt saying to omit. Strip
+  // those and any value outside the enum so the DB column stays clean.
+  obj.blocks_json = obj.blocks_json.map((b) => {
+    if (b.sub_phase === undefined) return b;
+    const v = b.sub_phase as unknown;
+    if (typeof v !== 'string' || !ALLOWED_SUB_PHASES.has(v)) {
+      const { sub_phase: _drop, ...rest } = b;
+      return rest as typeof b;
+    }
+    return b;
+  });
 
   return obj;
 }

@@ -128,6 +128,10 @@ export type PedagogicalModel =
   | 'tpsr'
   | 'skill-themes'
   | 'cooperative'
+  // Mosston's Spectrum — the meta-framework. The LLM is free to return this
+  // when a lesson mixes multiple styles; otherwise it should pick one of the
+  // specific sub-styles below.
+  | 'mosston-spectrum'
   | 'mosston-command'
   | 'mosston-practice'
   | 'mosston-reciprocal'

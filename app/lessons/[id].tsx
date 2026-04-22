@@ -203,7 +203,7 @@ export default function LessonDetail() {
           )}
 
           <Pressable style={styles.startBtn} onPress={onStart}>
-            <Text style={styles.startLabel}>▶  {he.runner.startLesson}</Text>
+            <Text style={styles.startLabel}>{he.runner.startLesson}</Text>
           </Pressable>
 
           <Pressable style={styles.deleteBtn} onPress={confirmDeleteLesson}>

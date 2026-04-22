@@ -236,6 +236,27 @@ function activityWhitelistFor(env: ActivityEnvironment): Activity[] {
 
 type Assertion = { ok: true } | { ok: false; reason: string };
 
+const ALLOWED_PEDAGOGICAL_MODELS = new Set([
+  'tgfu',
+  'sport-education',
+  'tpsr',
+  'skill-themes',
+  'cooperative',
+  'mosston-spectrum',
+  'mosston-command',
+  'mosston-practice',
+  'mosston-reciprocal',
+  'mosston-self-check',
+  'mosston-inclusion',
+  'mosston-guided-discovery',
+  'mosston-convergent',
+  'mosston-divergent',
+  'mosston-individual',
+  'mosston-learner-initiated',
+  'mosston-self-teaching',
+]);
+const ALLOWED_SUB_PHASES = new Set(['raise', 'activate', 'mobilize', 'potentiate']);
+
 function assertSchema(lesson: GeneratedLesson, constraints: DesignerConstraints): Assertion {
   if (!lesson.title_he || typeof lesson.title_he !== 'string') {
     return { ok: false, reason: 'missing title_he' };
@@ -246,7 +267,14 @@ function assertSchema(lesson: GeneratedLesson, constraints: DesignerConstraints)
   if (!['gym', 'outdoor', 'studio'].includes(lesson.environment)) {
     return { ok: false, reason: `bad environment: ${lesson.environment}` };
   }
+  if (!ALLOWED_PEDAGOGICAL_MODELS.has(lesson.pedagogical_model)) {
+    return {
+      ok: false,
+      reason: `pedagogical_model "${lesson.pedagogical_model}" not in allowed enum`,
+    };
+  }
   const phases = new Set(['warmup', 'main', 'cooldown']);
+  const ids = new Set<string>();
   for (const b of lesson.blocks_json) {
     if (!phases.has(b.phase)) return { ok: false, reason: `bad phase: ${b.phase}` };
     if (typeof b.duration_s !== 'number' || b.duration_s <= 0) {
@@ -254,6 +282,24 @@ function assertSchema(lesson: GeneratedLesson, constraints: DesignerConstraints)
     }
     if (!Array.isArray(b.activity_ids)) {
       return { ok: false, reason: `bad activity_ids for block ${b.id}` };
+    }
+    if (ids.has(b.id)) {
+      return { ok: false, reason: `duplicate block id: ${b.id}` };
+    }
+    ids.add(b.id);
+    // sub_phase must be omitted on non-warmup blocks, and must be one of the
+    // RAMP values on warmup blocks. The string literal "undefined" (a known
+    // LLM failure mode) is never valid.
+    if (b.sub_phase !== undefined) {
+      if (b.phase !== 'warmup') {
+        return { ok: false, reason: `sub_phase set on ${b.phase} block ${b.id}` };
+      }
+      if (!ALLOWED_SUB_PHASES.has(b.sub_phase as string)) {
+        return {
+          ok: false,
+          reason: `invalid sub_phase "${b.sub_phase}" on block ${b.id}`,
+        };
+      }
     }
   }
   const totalS = lesson.blocks_json.reduce((acc, b) => acc + b.duration_s, 0);
