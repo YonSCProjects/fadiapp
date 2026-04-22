@@ -89,6 +89,11 @@ export function pauseRunner(state: RunnerState, now: number): RunnerState {
 export function advanceIfComplete(state: RunnerState, now: number): RunnerState {
   if (state.finishedAt !== null) return state;
   let idx = state.currentIdx;
+  // Short-circuit when the current block hasn't completed yet — avoids
+  // allocating a new state object every UI tick, which made referential
+  // equality checks (`advanced !== s`) spuriously fire per tick.
+  const current = state.blocks[idx];
+  if (!current || !isComplete(current, now)) return state;
   const blocks = state.blocks.slice();
 
   while (idx < blocks.length && isComplete(blocks[idx]!, now)) {

@@ -23,6 +23,7 @@ import {
   type RunnerState,
 } from '@/runner/wallClock';
 import { blocksFromLesson } from '@/runner/fromLesson';
+import { playDing, playPip, unloadRunnerAudio } from '@/runner/audio';
 import {
   getInstance,
   isActualBlocksRecord,
@@ -52,6 +53,9 @@ export default function RunnerScreen() {
   const [, forceRender] = useState(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastBlockIdRef = useRef<string | null>(null);
+  // Tracks the last remaining-whole-seconds value we emitted a pip for, so a
+  // 250ms tick doesn't double-play the 3-second beep within the same second.
+  const lastPipSecRef = useRef<number>(-1);
 
   // Load / hydrate -----------------------------------------------------------
   useEffect(() => {
@@ -125,17 +129,33 @@ export default function RunnerScreen() {
       return;
     }
     tickRef.current = setInterval(() => {
+      const nowMs = Date.now();
       setState((s) => {
         if (!s) return s;
-        const advanced = advanceIfComplete(s, Date.now());
+        const advanced = advanceIfComplete(s, nowMs);
         if (advanced !== s) {
-          // Block transition — persist + haptic.
+          // Block transition — persist only; haptic + ding fire from the
+          // block-change effect below (which also catches user-initiated
+          // skips). Keeping them in one place prevents double-triggers.
           persist(advanced, deviations);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
           return advanced;
         }
         return s;
       });
+
+      // 3-2-1 countdown pips. Check against current state without forcing a
+      // state read; we look at the last-known state ref via closure.
+      const cur = state?.blocks[state.currentIdx];
+      if (cur && isRunning(cur) && state?.finishedAt === null) {
+        const remSec = Math.ceil(remainingMs(cur, nowMs) / 1000);
+        if (remSec >= 1 && remSec <= 3 && remSec !== lastPipSecRef.current) {
+          lastPipSecRef.current = remSec;
+          playPip().catch(() => {});
+        }
+        // Reset the pip memory once we're past the 3s window.
+        if (remSec > 3) lastPipSecRef.current = -1;
+      }
+
       forceRender((n) => n + 1);
     }, TICK_MS);
     return () => {
@@ -144,16 +164,33 @@ export default function RunnerScreen() {
     };
   }, [state, deviations, persist]);
 
-  // Track block changes for haptics (including from user actions).
+  // Track block changes for haptics + audio ding (fires for natural
+  // completion AND user skips — one place, one trigger per transition).
   useEffect(() => {
     if (!state) return;
     const current = state.blocks[state.currentIdx];
     const id = current?.id ?? null;
     if (id !== lastBlockIdRef.current) {
+      const isFirstMount = lastBlockIdRef.current === null;
       lastBlockIdRef.current = id;
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      // Reset pip memory so the new block's countdown fires fresh.
+      lastPipSecRef.current = -1;
+      // Skip the cue on first mount (loading the screen for the first
+      // time shouldn't ding just because we just learned which block
+      // is current).
+      if (!isFirstMount) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        playDing().catch(() => {});
+      }
     }
   }, [state]);
+
+  // Release audio resources on unmount.
+  useEffect(() => {
+    return () => {
+      unloadRunnerAudio();
+    };
+  }, []);
 
   const now = Date.now();
   const currentBlock = useMemo(
