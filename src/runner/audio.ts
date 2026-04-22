@@ -3,9 +3,10 @@
 //   pip  — short 880Hz tone, played at each second of the 3-2-1 countdown
 //   ding — two-tone chime, played at block transitions (end of block)
 //
-// expo-audio's createAudioPlayer lets us preload once and replay fast.
-// We seek back to 0 before each replay because playing a completed clip
-// no-ops otherwise.
+// expo-audio is a native module. On a dev client built before the plugin
+// was added, the native side isn't linked and createAudioPlayer throws.
+// We tolerate that silently — haptic stays as the baseline cue, audio is
+// the additive nice-to-have.
 
 import { createAudioPlayer, type AudioPlayer, setAudioModeAsync } from 'expo-audio';
 
@@ -17,59 +18,79 @@ const dingSource = require('../../assets/sounds/ding.wav');
 let pipPlayer: AudioPlayer | null = null;
 let dingPlayer: AudioPlayer | null = null;
 let modeConfigured = false;
+// Flips to true the first time any native call fails — disables all further
+// audio work for this session without flooding the console.
+let audioUnavailable = false;
 
 async function ensureMode(): Promise<void> {
-  if (modeConfigured) return;
+  if (modeConfigured || audioUnavailable) return;
   modeConfigured = true;
-  // Play through the device speaker even in silent mode — this is a coaching
-  // tool, silent mode isn't what the teacher meant for gym-floor cues. Also
-  // disable "interrupt music" in case a teacher has music playing in the
-  // background: we want to blend, not stop their warmup playlist.
   try {
     await setAudioModeAsync({
       playsInSilentMode: true,
       interruptionMode: 'mixWithOthers',
       shouldPlayInBackground: false,
     });
-  } catch {
-    // Non-fatal — the sounds just won't respect silent mode.
+  } catch (e) {
+    audioUnavailable = true;
+    if (__DEV__) {
+      console.warn(
+        '[audio] expo-audio not available — rebuild dev client to enable runner sounds. Continuing silently.',
+        e,
+      );
+    }
   }
 }
 
 function ensurePlayers(): void {
-  if (!pipPlayer) pipPlayer = createAudioPlayer(pipSource);
-  if (!dingPlayer) dingPlayer = createAudioPlayer(dingSource);
+  if (audioUnavailable) return;
+  try {
+    if (!pipPlayer) pipPlayer = createAudioPlayer(pipSource);
+    if (!dingPlayer) dingPlayer = createAudioPlayer(dingSource);
+  } catch (e) {
+    audioUnavailable = true;
+    if (__DEV__) {
+      console.warn(
+        '[audio] expo-audio not available — rebuild dev client to enable runner sounds. Continuing silently.',
+        e,
+      );
+    }
+  }
 }
 
 async function replay(player: AudioPlayer): Promise<void> {
   try {
-    // Seek to start before play so repeat taps within ~1s re-trigger.
     await player.seekTo(0);
     player.play();
   } catch {
-    // Haptic is the baseline channel — swallow audio errors, they'd just
-    // be a second-class cue failure and shouldn't break the runner.
+    // Don't flip audioUnavailable here — transient replay failures (seek mid-
+    // ready, OS interruption) shouldn't kill audio for the whole session.
   }
 }
 
 export async function playPip(): Promise<void> {
   await ensureMode();
+  if (audioUnavailable) return;
   ensurePlayers();
   if (pipPlayer) await replay(pipPlayer);
 }
 
 export async function playDing(): Promise<void> {
   await ensureMode();
+  if (audioUnavailable) return;
   ensurePlayers();
   if (dingPlayer) await replay(dingPlayer);
 }
 
-// Call on runner unmount if you want to free the underlying native resources
-// early. Not strictly required — they'll be GC'd when the app unloads.
 export function unloadRunnerAudio(): void {
-  pipPlayer?.remove();
-  dingPlayer?.remove();
+  try {
+    pipPlayer?.remove();
+    dingPlayer?.remove();
+  } catch {
+    // Teardown errors are never worth surfacing.
+  }
   pipPlayer = null;
   dingPlayer = null;
   modeConfigured = false;
+  audioUnavailable = false; // let the next mount re-probe
 }
