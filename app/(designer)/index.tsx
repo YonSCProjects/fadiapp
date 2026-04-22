@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -12,7 +12,17 @@ import { Stack, useRouter } from 'expo-router';
 import { he } from '@/i18n/he';
 import { designLesson, resolveActivityRefs, type GeneratedLesson } from '@/llm/designer';
 import type { DesignerConstraints } from '@/llm/prompts/he/lessonDesigner';
-import { createLesson } from '@/db/repos/lessons';
+import { createLesson, getRecentDistinctGoals } from '@/db/repos/lessons';
+import {
+  DEFAULT_EQUIPMENT_CATALOG_HE,
+  getCurrentTeacher,
+  getDisabledModels,
+  getEquipmentCatalog,
+  setDisabledModels,
+  setEquipmentCatalog,
+} from '@/db/repos/teachers';
+import { EquipmentManagerModal } from '@/ui/EquipmentManagerModal';
+import { ModelManagerModal } from '@/ui/ModelManagerModal';
 import type { Activity, PedagogicalModel } from '@/db/schema';
 import { and, inArray, isNull } from 'drizzle-orm';
 import { activities } from '@/db/schema';
@@ -28,26 +38,14 @@ const ENVIRONMENTS: Array<{ key: 'gym' | 'outdoor' | 'studio'; label: string }> 
   { key: 'studio', label: he.designer.envStudio },
 ];
 
-const EQUIPMENT_OPTIONS = [
-  'כדורסל',
-  'כדורגל',
-  'כדורעף',
-  'כדוריד',
-  'חבלי קפיצה',
-  'קונוסים',
-  'מחצלות',
-  'שער',
-  'פריסבי',
-  'כדורי קצף',
-];
-
-const MODEL_OPTIONS: Array<{ key: PedagogicalModel | 'auto'; label: string }> = [
+const ALL_MODEL_OPTIONS: Array<{ key: PedagogicalModel | 'auto'; label: string }> = [
   { key: 'auto', label: he.designer.modelAuto },
   { key: 'tgfu', label: 'TGfU — למידה מבוססת משחק' },
   { key: 'sport-education', label: 'חינוך ספורטיבי' },
   { key: 'tpsr', label: 'אחריות (TPSR)' },
   { key: 'skill-themes', label: 'נושאי מיומנויות' },
   { key: 'cooperative', label: 'למידה שיתופית' },
+  { key: 'mosston-spectrum', label: 'ספקטרום מוסטון' },
 ];
 
 type Phase = 'gather' | 'generating' | 'preview' | 'saved' | 'error';
@@ -71,9 +69,45 @@ export default function DesignerHome() {
   const [equipment, setEquipment] = useState<Set<string>>(new Set());
   const [preferredModel, setPreferredModel] = useState<PedagogicalModel | 'auto'>('auto');
   const [specialHe, setSpecialHe] = useState<string>('');
+  const [recentGoals, setRecentGoals] = useState<string[]>([]);
+  const [equipmentCatalog, setEquipmentCatalogState] = useState<string[]>(
+    DEFAULT_EQUIPMENT_CATALOG_HE,
+  );
+  const [disabledModels, setDisabledModelsState] = useState<string[]>([]);
+  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
+  const [modelModalOpen, setModelModalOpen] = useState(false);
+
+  useEffect(() => {
+    getRecentDistinctGoals(8).then(setRecentGoals).catch(() => {});
+    getEquipmentCatalog().then(setEquipmentCatalogState).catch(() => {});
+    getDisabledModels().then(setDisabledModelsState).catch(() => {});
+  }, []);
+
+  const modelOptions = useMemo(
+    () => ALL_MODEL_OPTIONS.filter((m) => m.key === 'auto' || !disabledModels.includes(m.key)),
+    [disabledModels],
+  );
+
+  async function saveEquipmentCatalog(next: string[]) {
+    setEquipmentCatalogState(next);
+    // Drop selections that no longer exist in the catalog.
+    setEquipment((prev) => new Set([...prev].filter((x) => next.includes(x))));
+    const t = await getCurrentTeacher();
+    if (t) await setEquipmentCatalog(t.id, next);
+  }
+
+  async function saveDisabledModels(next: string[]) {
+    setDisabledModelsState(next);
+    // If the currently picked preferred model got disabled, fall back to auto.
+    if (preferredModel !== 'auto' && next.includes(preferredModel)) {
+      setPreferredModel('auto');
+    }
+    const t = await getCurrentTeacher();
+    if (t) await setDisabledModels(t.id, next);
+  }
 
   const canGenerate = useMemo(
-    () => goalHe.trim().length >= 5 && Number(classSize) > 0,
+    () => goalHe.trim().length > 0 && Number(classSize) > 0,
     [goalHe, classSize],
   );
 
@@ -163,16 +197,34 @@ export default function DesignerHome() {
           setClassSize={setClassSize}
           goalHe={goalHe}
           setGoalHe={setGoalHe}
+          recentGoals={recentGoals}
           equipment={equipment}
           setEquipment={setEquipment}
+          equipmentCatalog={equipmentCatalog}
+          onEditEquipment={() => setEquipmentModalOpen(true)}
           preferredModel={preferredModel}
           setPreferredModel={setPreferredModel}
+          modelOptions={modelOptions}
+          onEditModels={() => setModelModalOpen(true)}
           specialHe={specialHe}
           setSpecialHe={setSpecialHe}
           canGenerate={canGenerate}
           onGenerate={onGenerate}
         />
       )}
+
+      <EquipmentManagerModal
+        visible={equipmentModalOpen}
+        catalog={equipmentCatalog}
+        onClose={() => setEquipmentModalOpen(false)}
+        onSave={saveEquipmentCatalog}
+      />
+      <ModelManagerModal
+        visible={modelModalOpen}
+        disabled={disabledModels}
+        onClose={() => setModelModalOpen(false)}
+        onSave={saveDisabledModels}
+      />
 
       {phase === 'generating' && (
         <View style={[styles.generatingContainer, centerPad]}>
@@ -238,10 +290,15 @@ function GatherForm(props: {
   setClassSize: (s: string) => void;
   goalHe: string;
   setGoalHe: (s: string) => void;
+  recentGoals: string[];
   equipment: Set<string>;
   setEquipment: (s: Set<string>) => void;
+  equipmentCatalog: string[];
+  onEditEquipment: () => void;
   preferredModel: PedagogicalModel | 'auto';
   setPreferredModel: (m: PedagogicalModel | 'auto') => void;
+  modelOptions: Array<{ key: PedagogicalModel | 'auto'; label: string }>;
+  onEditModels: () => void;
   specialHe: string;
   setSpecialHe: (s: string) => void;
   canGenerate: boolean;
@@ -303,11 +360,32 @@ function GatherForm(props: {
           multiline
           textAlign="right"
         />
+        {props.recentGoals.length > 0 && (
+          <View style={styles.recentGoals}>
+            <Text style={styles.recentGoalsLabel}>{he.designer.recentGoals}</Text>
+            <View style={styles.chipsRow}>
+              {props.recentGoals.map((g) => (
+                <Text
+                  key={g}
+                  onPress={() => props.setGoalHe(g)}
+                  style={styles.recentGoalChip}
+                  numberOfLines={1}
+                >
+                  {g.length > 40 ? g.slice(0, 40) + '…' : g}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
       </Field>
 
-      <Field label={he.designer.equipment}>
+      <FieldWithAction
+        label={he.designer.equipment}
+        actionLabel={he.designer.equipmentEdit}
+        onAction={props.onEditEquipment}
+      >
         <View style={styles.chipsRow}>
-          {EQUIPMENT_OPTIONS.map((item) => {
+          {props.equipmentCatalog.map((item) => {
             const selected = props.equipment.has(item);
             return (
               <Text
@@ -320,11 +398,15 @@ function GatherForm(props: {
             );
           })}
         </View>
-      </Field>
+      </FieldWithAction>
 
-      <Field label={he.designer.preferredModel}>
+      <FieldWithAction
+        label={he.designer.preferredModel}
+        actionLabel={he.designer.preferredModelEdit}
+        onAction={props.onEditModels}
+      >
         <View style={styles.chipsRow}>
-          {MODEL_OPTIONS.map((m) => {
+          {props.modelOptions.map((m) => {
             const selected = props.preferredModel === m.key;
             return (
               <Text
@@ -337,7 +419,7 @@ function GatherForm(props: {
             );
           })}
         </View>
-      </Field>
+      </FieldWithAction>
 
       <Field label={he.designer.specialConsiderations}>
         <TextInput
@@ -404,6 +486,30 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
+      {children}
+    </View>
+  );
+}
+
+function FieldWithAction({
+  label,
+  actionLabel,
+  onAction,
+  children,
+}: {
+  label: string;
+  actionLabel: string;
+  onAction: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.field}>
+      <View style={styles.fieldHeader}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        <Pressable onPress={onAction} hitSlop={8}>
+          <Text style={styles.fieldAction}>{actionLabel}</Text>
+        </Pressable>
+      </View>
       {children}
     </View>
   );
@@ -486,6 +592,8 @@ const styles = StyleSheet.create({
   savedTitle: { color: '#86efac', fontSize: 22, fontWeight: '700' },
   field: { gap: 8 },
   fieldLabel: { color: '#a0a0a8', fontSize: 14 },
+  fieldHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  fieldAction: { color: '#3b82f6', fontSize: 13 },
   input: {
     backgroundColor: '#23232a',
     color: '#f5f5f5',
@@ -495,6 +603,20 @@ const styles = StyleSheet.create({
   },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  recentGoals: { marginTop: 4, gap: 6 },
+  recentGoalsLabel: { color: '#6a6a72', fontSize: 11 },
+  recentGoalChip: {
+    backgroundColor: '#1a1a20',
+    color: '#c0c0c8',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    fontSize: 12,
+    overflow: 'hidden',
+    maxWidth: 260,
+    borderWidth: 1,
+    borderColor: '#2a2a32',
+  },
   chip: {
     backgroundColor: '#23232a',
     color: '#f5f5f5',

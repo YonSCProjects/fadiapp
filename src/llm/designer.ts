@@ -1,6 +1,7 @@
 import { and, inArray, isNull } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { activities, type Activity } from '@/db/schema';
+import { getDisabledModels } from '@/db/repos/teachers';
 import { firstText } from './client';
 import { callLlmStream, type StreamHandlers } from './stream';
 import {
@@ -42,10 +43,11 @@ export async function designLesson(
     throw new Error('no activities available for this environment — KB importer may not have run');
   }
 
-  // Split the system prompt so the static-per-session chunk (pedagogy cards,
-  // RAMP, safety, JSON schema) gets cached by Anthropic. Subsequent lesson
-  // generations in the same session skip re-billing + re-processing it.
-  const system = buildSystemPrompt();
+  // Respect teacher's disabled-models preference: those cards don't enter the
+  // prompt, so the LLM can't pick them. Cache key changes per enabled set, so
+  // a teacher with a stable preference still benefits from Anthropic's cache.
+  const disabledModels = await getDisabledModels();
+  const system = buildSystemPrompt({ disabledModels });
   const userMessage = buildUserMessage(constraints, whitelist);
 
   const response = await callLlmStream(

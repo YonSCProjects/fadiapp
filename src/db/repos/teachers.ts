@@ -41,3 +41,53 @@ export async function setDriveFolderId(teacherId: string, folderId: string): Pro
     })
     .where(eq(teachers.id, teacherId));
 }
+
+// Default equipment catalog seeded on first read. Teachers edit freely from there.
+export const DEFAULT_EQUIPMENT_CATALOG_HE: string[] = [
+  'כדורסל',
+  'כדורגל',
+  'כדורעף',
+  'כדוריד',
+  'חבלי קפיצה',
+  'קונוסים',
+  'מחצלות',
+  'שער',
+  'פריסבי',
+  'כדורי קצף',
+];
+
+export async function getEquipmentCatalog(): Promise<string[]> {
+  const t = await getCurrentTeacher();
+  return t?.equipment_catalog_json ?? DEFAULT_EQUIPMENT_CATALOG_HE;
+}
+
+export async function setEquipmentCatalog(teacherId: string, items: string[]): Promise<void> {
+  const normalized = Array.from(
+    new Set(items.map((s) => s.trim()).filter((s) => s.length > 0)),
+  );
+  await db
+    .update(teachers)
+    .set({
+      equipment_catalog_json: normalized,
+      updated_at: new Date(),
+      sync_rev: sql`${teachers.sync_rev} + 1`,
+    })
+    .where(eq(teachers.id, teacherId));
+}
+
+export async function getDisabledModels(): Promise<string[]> {
+  const t = await getCurrentTeacher();
+  return t?.disabled_models_json ?? [];
+}
+
+export async function setDisabledModels(teacherId: string, models: string[]): Promise<void> {
+  const normalized = Array.from(new Set(models));
+  await db
+    .update(teachers)
+    .set({
+      disabled_models_json: normalized,
+      updated_at: new Date(),
+      sync_rev: sql`${teachers.sync_rev} + 1`,
+    })
+    .where(eq(teachers.id, teacherId));
+}

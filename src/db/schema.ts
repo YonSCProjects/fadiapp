@@ -37,6 +37,10 @@ export const teachers = sqliteTable('teachers', {
   school_name: text('school_name'),
   drive_folder_id: text('drive_folder_id'),
   locale: text('locale').notNull().default('he-IL'),
+  // Teacher preferences (editable from the designer and settings screens).
+  // Null = use hardcoded defaults; array = explicit catalog/filter.
+  equipment_catalog_json: text('equipment_catalog_json', { mode: 'json' }).$type<string[]>(),
+  disabled_models_json: text('disabled_models_json', { mode: 'json' }).$type<string[]>(),
   ...timestamps,
 });
 

@@ -68,8 +68,10 @@ const JSON_SCHEMA_HINT = `{
   ]
 }`;
 
-function buildPedagogyCardsBlock(): string {
+function buildPedagogyCardsBlock(disabledModels: string[] = []): string {
+  const disabled = new Set(disabledModels);
   return pedagogyCards.cards
+    .filter((c) => !disabled.has(c.key))
     .map(
       (c) =>
         `- ${c.key}: ${c.name_he}. ${c.summary_he} מתי להשתמש: ${c.when_to_use_he}`,
@@ -93,11 +95,11 @@ function buildActivitiesContext(activities: Activity[]): string {
     .join('\n');
 }
 
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(opts: { disabledModels?: string[] } = {}): string {
   return `אתה מעצב שיעורים של מורה לחינוך גופני בבית ספר יסודי-תיכון בישראל (כיתות ז-יב). תפקידך לעצב שיעור אחד שלם על בסיס אילוצים שהמורה מספק.
 
 ## מודלים פדגוגיים זמינים
-${buildPedagogyCardsBlock()}
+${buildPedagogyCardsBlock(opts.disabledModels)}
 
 ## מבנה חימום (פרוטוקול RAMP)
 חימום סטנדרטי כולל ארבעה תת-שלבים:

@@ -48,6 +48,24 @@ export async function softDeleteLesson(id: string): Promise<void> {
     .where(eq(lessons.id, id));
 }
 
+export async function getRecentDistinctGoals(limit = 8): Promise<string[]> {
+  const rows = await db
+    .select({ goal_he: lessons.goal_he, updated_at: lessons.updated_at })
+    .from(lessons)
+    .where(isNull(lessons.deleted_at))
+    .orderBy(desc(lessons.updated_at));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of rows) {
+    const g = (r.goal_he ?? '').trim();
+    if (!g || seen.has(g)) continue;
+    seen.add(g);
+    out.push(g);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 export async function countLessonsByModel(): Promise<Record<string, number>> {
   const rows = await db
     .select({
