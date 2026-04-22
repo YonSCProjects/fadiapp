@@ -351,32 +351,11 @@ function GatherForm(props: {
       </Field>
 
       <Field label={he.designer.goal}>
-        <TextInput
+        <GoalInputWithAutofill
           value={props.goalHe}
-          onChangeText={props.setGoalHe}
-          placeholder={he.designer.goalPlaceholder}
-          placeholderTextColor="#6a6a72"
-          style={[styles.input, styles.textarea]}
-          multiline
-          textAlign="right"
+          onChange={props.setGoalHe}
+          suggestions={props.recentGoals}
         />
-        {props.recentGoals.length > 0 && (
-          <View style={styles.recentGoals}>
-            <Text style={styles.recentGoalsLabel}>{he.designer.recentGoals}</Text>
-            <View style={styles.chipsRow}>
-              {props.recentGoals.map((g) => (
-                <Text
-                  key={g}
-                  onPress={() => props.setGoalHe(g)}
-                  style={styles.recentGoalChip}
-                  numberOfLines={1}
-                >
-                  {g.length > 40 ? g.slice(0, 40) + '…' : g}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
       </Field>
 
       <FieldWithAction
@@ -479,6 +458,70 @@ function LessonPreview({
         <Btn label={he.designer.regenerate} onPress={onRegen} />
       </View>
     </ScrollView>
+  );
+}
+
+function GoalInputWithAutofill({
+  value,
+  onChange,
+  suggestions,
+}: {
+  value: string;
+  onChange: (s: string) => void;
+  suggestions: string[];
+}) {
+  const [focused, setFocused] = useState(false);
+
+  // Filter suggestions by current input (case-insensitive substring).
+  // If input matches a suggestion exactly, hide it — no point suggesting
+  // what's already typed.
+  const filtered = useMemo(() => {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return suggestions;
+    const lower = trimmed.toLowerCase();
+    return suggestions.filter(
+      (g) => g.toLowerCase().includes(lower) && g !== trimmed,
+    );
+  }, [value, suggestions]);
+
+  const showSuggestions = focused && filtered.length > 0;
+
+  return (
+    <View style={{ gap: 8 }}>
+      <TextInput
+        value={value}
+        onChangeText={onChange}
+        placeholder={he.designer.goalPlaceholder}
+        placeholderTextColor="#6a6a72"
+        style={[styles.input, styles.textarea]}
+        multiline
+        textAlign="right"
+        onFocus={() => setFocused(true)}
+        // Small delay on blur so tapping a suggestion registers before
+        // the chips vanish — RN raises blur before the Pressable below
+        // fires onPress otherwise.
+        onBlur={() => setTimeout(() => setFocused(false), 200)}
+      />
+      {showSuggestions && (
+        <View style={styles.autofillBox}>
+          <Text style={styles.autofillLabel}>{he.designer.recentGoals}</Text>
+          {filtered.map((g) => (
+            <Pressable
+              key={g}
+              onPress={() => {
+                onChange(g);
+                setFocused(false);
+              }}
+              style={styles.autofillRow}
+            >
+              <Text style={styles.autofillText} numberOfLines={2}>
+                {g}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -603,19 +646,27 @@ const styles = StyleSheet.create({
   },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  recentGoals: { marginTop: 4, gap: 6 },
-  recentGoalsLabel: { color: '#6a6a72', fontSize: 11 },
-  recentGoalChip: {
-    backgroundColor: '#1a1a20',
-    color: '#c0c0c8',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
-    fontSize: 12,
-    overflow: 'hidden',
-    maxWidth: 260,
+  autofillBox: {
+    backgroundColor: '#16161c',
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#2a2a32',
+    paddingVertical: 6,
+  },
+  autofillLabel: {
+    color: '#6a6a72',
+    fontSize: 11,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+  },
+  autofillRow: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  autofillText: {
+    color: '#c0c0c8',
+    fontSize: 14,
+    lineHeight: 20,
   },
   chip: {
     backgroundColor: '#23232a',
