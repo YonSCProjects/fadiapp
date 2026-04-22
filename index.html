@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עולם הספורט של פאדי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --gym: #c026d3; --gym-dark: #86198f;
+    --ath: #f97316; --ath-dark: #c2410c;
+    --foot: #16a34a; --foot-dark: #15803d;
+    --bask: #ea580c; --bask-dark: #9a3412;
+    --swim: #0891b2; --swim-dark: #155e75;
+    --ten: #ca8a04; --ten-dark: #854d0e;
+    --extr: #dc2626; --extr-dark: #7f1d1d;
+    --sci: #6366f1; --sci-dark: #3730a3;
+    --ink: #0f172a; --paper: #fffbeb;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Heebo', 'Rubik', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.7; overflow-x: hidden; }
+  .hero { min-height: 100vh; background: radial-gradient(circle at 15% 20%, rgba(249,115,22,0.25) 0%, transparent 45%), radial-gradient(circle at 85% 30%, rgba(8,145,178,0.25) 0%, transparent 45%), radial-gradient(circle at 50% 85%, rgba(22,163,74,0.25) 0%, transparent 45%), linear-gradient(135deg, #1e293b 0%, #0f172a 100%); position: relative; display: flex; align-items: center; justify-content: center; padding: 40px 20px; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 2px, transparent 2px), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 2px, transparent 2px); background-size: 80px 80px; opacity: 0.5; }
+  .floating-emoji { position: absolute; font-size: 3rem; opacity: 0.35; animation: float 8s ease-in-out infinite; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
+  .f1 { top: 10%; right: 8%; animation-delay: 0s; }
+  .f2 { top: 20%; left: 10%; animation-delay: 1.5s; font-size: 2.5rem; }
+  .f3 { top: 65%; right: 15%; animation-delay: 3s; font-size: 3.5rem; }
+  .f4 { top: 75%; left: 8%; animation-delay: 2s; }
+  .f5 { top: 45%; left: 5%; animation-delay: 4s; font-size: 2rem; }
+  .f6 { top: 40%; right: 4%; animation-delay: 1s; font-size: 2.5rem; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-25px) rotate(8deg); } }
+  .hero-content { position: relative; z-index: 2; text-align: center; color: white; max-width: 900px; }
+  .hero h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 20px; background: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -2px; }
+  .hero h2 { font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 400; color: #cbd5e1; margin-bottom: 40px; max-width: 700px; margin-right: auto; margin-left: auto; }
+  .sports-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 40px; }
+  .sport-chip { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: white; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+  .sport-chip:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .scroll-arrow { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: white; font-size: 2rem; animation: bounce 2s infinite; z-index: 2; cursor: pointer; }
+  @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+  .intro { max-width: 850px; margin: 0 auto; padding: 100px 30px 60px; text-align: center; }
+  .intro p { font-size: 1.25rem; color: #475569; font-weight: 400; }
+  .intro .quote-mark { font-size: 4rem; color: var(--ath); line-height: 0; display: block; margin-bottom: 20px; }
+  .stories { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; display: grid; gap: 40px; }
+  .story { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(15,23,42,0.08); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid rgba(0,0,0,0.04); }
+  .story:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(15,23,42,0.15); }
+  .story-header { padding: 35px 40px 25px; position: relative; color: white; overflow: hidden; }
+  .story-header::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%); animation: pulse 4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }
+  .story-number { position: absolute; top: 20px; left: 30px; font-size: 5rem; font-weight: 900; opacity: 0.18; line-height: 1; font-family: 'Rubik', sans-serif; }
+  .story-icon { font-size: 4.5rem; display: block; margin-bottom: 15px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); position: relative; z-index: 1; }
+  .sport-tag { display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border-radius: 50px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; position: relative; z-index: 1; }
+  .story-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 900; line-height: 1.2; position: relative; z-index: 1; }
+  .story-subtitle { font-size: 1.1rem; font-weight: 500; margin-top: 8px; opacity: 0.95; position: relative; z-index: 1; }
+  .story-year { display: inline-block; margin-top: 12px; padding: 4px 14px; background: rgba(0,0,0,0.25); border-radius: 8px; font-weight: 700; font-size: 0.9rem; position: relative; z-index: 1; }
+  .story-body { padding: 35px 40px 40px; font-size: 1.1rem; color: #334155; }
+  .story-body p { margin-bottom: 18px; }
+  .story-body p:last-child { margin-bottom: 0; }
+  .story-body strong { color: var(--ink); font-weight: 700; }
+  .moral { margin-top: 25px; padding: 20px 25px; border-right: 4px solid; border-radius: 0 12px 12px 0; font-style: italic; font-size: 1.05rem; line-height: 1.6; }
+  .story.gym .story-header { background: linear-gradient(135deg, var(--gym) 0%, var(--gym-dark) 100%); }
+  .story.gym .moral { background: #fae8ff; border-color: var(--gym); color: var(--gym-dark); }
+  .story.ath .story-header { background: linear-gradient(135deg, var(--ath) 0%, var(--ath-dark) 100%); }
+  .story.ath .moral { background: #fff7ed; border-color: var(--ath); color: var(--ath-dark); }
+  .story.foot .story-header { background: linear-gradient(135deg, var(--foot) 0%, var(--foot-dark) 100%); }
+  .story.foot .moral { background: #f0fdf4; border-color: var(--foot); color: var(--foot-dark); }
+  .story.bask .story-header { background: linear-gradient(135deg, var(--bask) 0%, var(--bask-dark) 100%); }
+  .story.bask .moral { background: #fff7ed; border-color: var(--bask); color: var(--bask-dark); }
+  .story.swim .story-header { background: linear-gradient(135deg, var(--swim) 0%, var(--swim-dark) 100%); }
+  .story.swim .moral { background: #ecfeff; border-color: var(--swim); color: var(--swim-dark); }
+  .story.ten .story-header { background: linear-gradient(135deg, var(--ten) 0%, var(--ten-dark) 100%); }
+  .story.ten .moral { background: #fefce8; border-color: var(--ten); color: var(--ten-dark); }
+  .story.extr .story-header { background: linear-gradient(135deg, var(--extr) 0%, var(--extr-dark) 100%); }
+  .story.extr .moral { background: #fef2f2; border-color: var(--extr); color: var(--extr-dark); }
+  .story.sci .story-header { background: linear-gradient(135deg, var(--sci) 0%, var(--sci-dark) 100%); }
+  .story.sci .moral { background: #eef2ff; border-color: var(--sci); color: var(--sci-dark); }
+  .footer { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 60px 20px; text-align: center; }
+  .footer-quote { font-size: 1.5rem; font-style: italic; font-weight: 300; max-width: 700px; margin: 0 auto 20px; color: #fbbf24; }
+  .footer-author { color: #94a3b8; font-size: 1rem; }
+  .footer-tagline { margin-top: 40px; color: #64748b; font-size: 0.95rem; }
+  .footer-tagline span { color: #f97316; font-weight: 700; }
+  @media (max-width: 640px) { .story-header, .story-body { padding: 30px 25px; } .story-number { font-size: 3.5rem; left: 15px; } .intro { padding: 60px 20px 40px; } }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="floating-emoji f1">🏅</div>
+  <div class="floating-emoji f2">⚽</div>
+  <div class="floating-emoji f3">🏀</div>
+  <div class="floating-emoji f4">🏊</div>
+  <div class="floating-emoji f5">🎾</div>
+  <div class="floating-emoji f6">🏃</div>
+  <div class="hero-content">
+    <h1>עולם הספורט של פאדי</h1>
+    <h2>20 סיפורים מעוררי השראה מעולם הספורט — על גבורה, חדשנות, מדע וערכים שעיצבו את ההיסטוריה</h2>
+    <div class="sports-grid">
+      <div class="sport-chip">🤸 התעמלות</div>
+      <div class="sport-chip">🏃 אתלטיקה</div>
+      <div class="sport-chip">⚽ כדורגל</div>
+      <div class="sport-chip">🏀 כדורסל</div>
+      <div class="sport-chip">🏊 שחייה</div>
+      <div class="sport-chip">🎾 טניס</div>
+      <div class="sport-chip">🧗 ספורט אתגרי</div>
+      <div class="sport-chip">⚾ בייסבול</div>
+      <div class="sport-chip">🥋 ג'ודו</div>
+      <div class="sport-chip">🔬 מדע הספורט</div>
+    </div>
+  </div>
+  <div class="scroll-arrow">↓</div>
+</section>
+<section class="intro">
+  <span class="quote-mark">"</span>
+  <p>הספורט הוא הרבה יותר ממשחק. זה שדה שבו אנשים הופכים את הבלתי אפשרי לאפשרי, שבו נשברים חוקים ונבנים ערכים, שבו דמעות של כאב הופכות לדמעות של שמחה. הסיפורים הבאים אינם רק רגעי זהב — הם שיעור לחיים.</p>
+</section>
+<main class="stories">
+
+  <article class="story gym">
+    <div class="story-header"><div class="story-number">01</div><span class="story-icon">🤸‍♀️</span><span class="sport-tag">התעמלות</span><h3 class="story-title">העשר המושלם הראשון בהיסטוריה</h3><p class="story-subtitle">נדיה קומנצ'י • אולימפיאדת מונטריאול</p><span class="story-year">1976</span></div>
+    <div class="story-body">
+      <p>נדיה קומנצ'י, ילדה רומנייה בת 14 וחצי עם קוקיות וחיוך ביישן, עלתה אל המתקן האולימפי במונטריאול. כשסיימה את תרגילה על מוט שני הגבהים, התרחש דבר חסר תקדים: היא קיבלה ציון מושלם של <strong>10.00</strong>. הבעיה הייתה שהלוחות האלקטרוניים של האולימפיאדה לא תוכנתו להציג את המספר הזה — איש לא האמין שזה אפשרי. הקהל הביט בתדהמה בלוח שהראה <strong>"1.00"</strong> עד שהכריזו בקול: עשר מושלם.</p>
+      <p>באותה אולימפיאדה נדיה השיגה <strong>שבעה ציונים מושלמים</strong> ושלוש מדליות זהב. ילדה שוויתרה על ילדות רגילה לטובת אימונים של עשר שעות ביום הפכה לאגדה. מעבר לציון המושלם, היא הוכיחה משהו עמוק יותר: השלמות לא נמדדת במספרים, אלא ברצון להגיע אליה.</p>
+      <div class="moral">"כל מה שעושים בחיים צריך לעשות עם תשוקה. אם אתה חולם משהו, תן לעצמך את הכוח לממש אותו." — נדיה קומנצ'י</div>
+    </div>
+  </article>
+
+  <article class="story gym">
+    <div class="story-header"><div class="story-number">02</div><span class="story-icon">🤕</span><span class="sport-tag">התעמלות</span><h3 class="story-title">הקפיצה על רגל אחת</h3><p class="story-subtitle">קרי סטראג • אולימפיאדת אטלנטה</p><span class="story-year">1996</span></div>
+    <div class="story-body">
+      <p>בגמר הקבוצתי באטלנטה, נבחרת ארה"ב הייתה במרחק נגיעה מזהב היסטורי — אם סטראג תצליח בקפיצה אחרונה במתקן הסוס. אבל בקפיצה הראשונה שלה היא נחתה לא נכון ו<strong>קרעה שתי רצועות בקרסול השמאלי</strong>. הכאב היה בלתי נסבל. כל מה שהיה עליה לעשות זה לוותר. אבל אז המאמן שלה, בלה קארוי, לחש לה: "את יכולה לעשות את זה, קרי".</p>
+      <p>היא החליקה לאחור, התחילה ריצה קצרה על קרסול הרוס, זינקה — וביצעה <strong>קפיצה מושלמת</strong>. ואז, עם שתי ידיים באוויר, נחתה על רגל אחת בלבד, הצדיעה לשופטים, ורק אז התמוטטה בצעקת כאב. הציון: 9.712. זהב. בלה קארוי נשא אותה על זרועותיו אל הפודיום, והתמונה הזו הפכה לאחד הסמלים הגדולים ביותר של אומץ בספורט.</p>
+      <div class="moral">לפעמים גדולה נמדדת לא במה שאתה יכול לעשות — אלא במה שאתה מוכן לסבול כדי לעשות את זה.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">03</div><span class="story-icon">🏃🏾</span><span class="sport-tag">אתלטיקה</span><h3 class="story-title">ארבע מדליות זהב בברלין הנאצית</h3><p class="story-subtitle">ג'סי אוונס • אולימפיאדת ברלין</p><span class="story-year">1936</span></div>
+    <div class="story-body">
+      <p>היטלר תכנן את אולימפיאדת ברלין כמופע ראווה של "עליונות הגזע הארי". ואז הגיע ג'סי אוונס — שחור אמריקאי, נכד לעבדים — וזכה בארבע מדליות זהב בארבעה ימים: 100 מטר, 200 מטר, קפיצה לרוחק ו<strong>שליחים 4×100</strong>. היטלר, שבימים הראשונים לחץ ידיים לזוכים גרמנים, סירב לברך אותו.</p>
+      <p>אך הסיפור היפה באמת קרה בתחרות קפיצה לרוחק. אוונס הסתבך עם שתי קפיצות פסולות. המתחרה הגרמני לוץ לונג — בלונדיני תכול עיניים, הדמות ששימשה את התעמולה הנאצית — ניגש אליו ונתן לו עצה לגבי זווית הזינוק. אוונס עקב אחר העצה, עבר לשלב הבא וזכה בזהב. לונג היה הראשון לחבק אותו. "אפשר להתיך את כל המדליות והגביעים שלי," אמר אוונס מאוחר יותר, "והם לא יהיו אפילו ציפוי על הידידות ב-24 קראט שקיבלתי מלוץ לונג."</p>
+      <div class="moral">בלב הרוע הגדול ביותר, מצא הספורט את הדרך להוכיח שהאנושיות חזקה מהאידיאולוגיה.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">04</div><span class="story-icon">👨‍👦</span><span class="sport-tag">אתלטיקה</span><h3 class="story-title">אבא שלי כאן</h3><p class="story-subtitle">דרק רדמונד • אולימפיאדת ברצלונה</p><span class="story-year">1992</span></div>
+    <div class="story-body">
+      <p>הבריטי דרק רדמונד היה אחד הפייבוריטים להגיע לגמר 400 מטר. בחצי הגמר בברצלונה הוא יצא במהירות ונראה היה שייכנס לגמר בקלות. ואז, 250 מטר מהסיום, משהו קרה -  <strong>שריר הירך האחורי שלו נקרע</strong> — הוא נפל על המסלול בצעקת כאב. זה היה סוף הקריירה האולימפית שלו.</p>
+      <p>אבל אז הוא עשה משהו בלתי נתפס: הוא קם, והחל לצלוע אל קו הסיום על רגל אחת. פתאום, גבר מבוגר פרץ מהיציע, עבר את המאבטחים, ותפס אותו. זה היה <strong>אבא שלו, ג'ים</strong>. "אתה לא חייב לעשות את זה," אמר לבנו. "אני חייב," ענה דרק בבכי. "טוב," אמר האב, "אז נעשה את זה יחד." הם השלימו את שארית המסלול יד ביד, בעוד 65,000 צופים ברצלונה קמים על רגליהם בדמעות ובמחיאות כפיים. דרק לא זכה במדליה. הוא זכה במשהו גדול בהרבה.</p>
+      <div class="moral">יש מסלולים בחיים שאי אפשר לסיים לבד — ויש אבות שמסרבים להניח לבן שלהם לסיים את המסלול לבד.</div>
+    </div>
+  </article>
+
+  <article class="story foot">
+    <div class="story-header"><div class="story-number">05</div><span class="story-icon">🕊️</span><span class="sport-tag">כדורגל</span><h3 class="story-title">משחק בין החפירות</h3><p class="story-subtitle">שביתת חג המולד • חזית המערב</p><span class="story-year">1914</span></div>
+    <div class="story-body">
+      <p>בחג המולד של 1914, במלחמת העולם הראשונה, כבר נהרגו מאות אלפים בחזית המערב. בליל חג המולד, חיילים גרמנים בחפירות שלהם החלו לשיר <em>"Silent Night"</em>. מהצד השני של הבוץ והתיל, החיילים הבריטים הקשיבו — ואז החלו לשיר את אותו השיר באנגלית. בבוקר, חיילים משני הצדדים יצאו בזהירות אל שטח ההפקר שבין החפירות.</p>
+      <p>הם החליפו סיגריות ושוקולדים, הראו זה לזה תמונות של משפחותיהם, ו<strong>שיחקו משחק כדורגל מאולתר</strong> — עם קסדות כשערים וכדור עשוי מסמרטוטים. לפי הדיווחים, הגרמנים ניצחו 3:2. למחרת חזרו לירות זה בזה. אבל אותו משחק, באותו יום שקט בלב הטבח, הפך לאחד הרגעים היפים בהיסטוריה של המין האנושי. זו הייתה הוכחה שכדורגל יכול להפסיק אפילו מלחמה — לזמן קצר.</p>
+      <div class="moral">יש ימים בהיסטוריה שבהם כדור מסמרטוטים חזק יותר מכל התותחים בעולם.</div>
+    </div>
+  </article>
+
+  <article class="story foot">
+    <div class="story-header"><div class="story-number">06</div><span class="story-icon">🦊</span><span class="sport-tag">כדורגל</span><h3 class="story-title">נס השועלים</h3><p class="story-subtitle">לסטר סיטי • אליפות הפרמייר ליג האנגלית</p><span class="story-year">2016</span></div>
+    <div class="story-body">
+      <p>בתחילת עונת 2015-16, הימורי הספורט דירגו את הסיכוי של לסטר סיטי לזכות באליפות הפרמייר ליג ב-<strong>1 ל-5,000</strong>. קבוצה קטנה מעיר קטנה, שבעונה הקודמת בקושי ניצלה מירידה לליגה השנייה. המאמן, קלאודיו ראניירי, כונה "הטינקרמן" בזכות ההרגל שלו לשנות כל הזמן את ההרכב. בקבוצה שיחק חלוץ בשם ג'יימי ורדי, שלפני כמה שנים עבד במפעל לייצור סדים רפואיים ושיחק כדורגל חצי-מקצועני בערבים.</p>
+      <p>ואז קרה הבלתי יאמן. ורדי <strong>הבקיע ב-11 משחקים רצופים</strong>, השחקן האלג'יראי ריאד מחרז הפך למלך המסירות, והקבוצה פשוט לא הפסידה. הם עברו את מנצ'סטר סיטי, צ'לסי, ארסנל וליברפול — את כל הענקיות של אנגליה. במאי 2016 הכתירו אותם אלופים. זה היה סיפור החלומות הגדול ביותר בהיסטוריית הכדורגל.</p>
+      <div class="moral">כל "בלתי אפשרי" הוא "אפשרי" שעדיין לא מצא את הקבוצה הנכונה.</div>
+    </div>
+  </article>
+
+  <article class="story bask">
+    <div class="story-header"><div class="story-number">07</div><span class="story-icon">🏀</span><span class="sport-tag">כדורסל</span><h3 class="story-title">משחק השפעת</h3><p class="story-subtitle">מייקל ג'ורדן • גמר ה-NBA</p><span class="story-year">1997</span></div>
+    <div class="story-body">
+      <p>משחק 5 בגמר ה-NBA בין שיקאגו בולס ליוטה ג'אז. התוצאה בסדרה עמדה על 2:2, וג'ורדן התעורר בבוקר המשחק עם חום גבוה, סחרחורות, בחילות וכאבי בטן. הוא לא הצליח לעמוד על רגליו. רופא הקבוצה אמר שאין סיכוי שישחק. ג'ורדן הסתכל עליו ואמר: <strong>"אני משחק."</strong></p>
+      <p>במהלך המשחק הוא נראה כמו רוח רפאים — חיוור, מזיע, התמוטט על הספסל בכל הפסקה. ובכל זאת, הוא שחק 44 דקות, קלע <strong>38 נקודות</strong>, לקח 7 ריבאונדים ומסר 5 אסיסטים. את הסל המנצח — שלשה דרמטית — הוא קלע 25 שניות לפני סיום המשחק. כשצופר הסיום נשמע והבולס ניצחו 90:88, ג'ורדן התמוטט לזרועותיו של סקוטי פיפן. התמונה הזו, של האגדה מתמוטט, הפכה לאחת הסמליות ביותר בהיסטוריית הכדורסל.</p>
+      <div class="moral">שחקנים גדולים לא מחכים להרגיש טוב כדי להיות טובים — הם פשוט נכנסים למגרש גם כשהכל נגדם.</div>
+    </div>
+  </article>
+
+  <article class="story bask">
+    <div class="story-header"><div class="story-number">08</div><span class="story-icon">⭐</span><span class="sport-tag">כדורסל</span><h3 class="story-title">אנחנו על המפה</h3><p class="story-subtitle">מכבי תל אביב • גביע אירופה</p><span class="story-year">1977</span></div>
+    <div class="story-body">
+      <p>באמצע שנות ה-70, ישראל הייתה מדינה צעירה שעדיין מחלימה ממלחמת יום הכיפורים. איש לא נתן לקבוצת כדורסל ישראלית סיכוי מול ענקיות אירופה. בחצי גמר גביע אירופה, מכבי תל אביב פגשה את CSKA מוסקבה — אלופת ברית המועצות, המועדון המעוטר ביותר ביבשת. המשחק התקיים בבלגיה, כי הסובייטים סירבו לשחק בישראל. ישראלים ברחבי הארץ נדבקו למסכי הטלוויזיה.</p>
+      <p>מכבי, בהנהגת טל ברודי, מיקי ברקוביץ' ואולסי פרי, ביצעה את הבלתי יאמן: <strong>ניצחון 91:77</strong>. אחרי המשחק, כשברודי התראיין בעברית שבורה, הוא אמר את המשפט שהפך לסיסמה לאומית: <em>"אנחנו על המפה! ואנחנו נשארים על המפה, לא רק בספורט, בכל דבר!"</em> כעבור שבועיים זכו מכבי בגביע — זכייה ראשונה של קבוצה ישראלית באליפות אירופה.</p>
+      <div class="moral">לפעמים ספורט מזכיר לעם שלם שהוא גדול יותר ממה שחשב שהוא.</div>
+    </div>
+  </article>
+
+  <article class="story swim">
+    <div class="story-header"><div class="story-number">09</div><span class="story-icon">🏊‍♂️</span><span class="sport-tag">שחייה</span><h3 class="story-title">מאית השנייה ששינתה הכל</h3><p class="story-subtitle">מייקל פלפס • אולימפיאדת בייג'ינג</p><span class="story-year">2008</span></div>
+    <div class="story-body">
+      <p>מייקל פלפס עמד בפתחו של שיא כל הזמנים: שבע מדליות זהב באולימפיאדה אחת, שישווה לשיאו של מארק ספיץ מ-1972. הגמר של 100 מטר פרפר היה המכשול השישי שלו. הוא יצא לזינוק ומיד נשאר מאחור. בחצי הראשון הוא היה במקום השביעי. הסרבי מילוראד קאביץ' הוביל בביטחון. הקהל החזיק את נשימתו.</p>
+      <p>בחמישים המטרים האחרונים, פלפס החל לסגור פערים. המטר האחרון: קאביץ' היה לפניו. קאביץ' החליט לסיים בגלישה רכה אל הקיר — פלפס לעומת זאת ביצע את <strong>החבטה האחרונה שלו בעוצמה אדירה ובתזמון מושלם</strong>. כשהלוחות עלו, ההפרש היה <em>0.01 שנייה</em>. פלפס זכה במדליה השביעית. באולימפיאדה ההיא הוא זכה <strong>בשמונה מדליות זהב</strong> ועקף את ספיץ.</p>
+      <div class="moral">בחיים ובבריכה, לפעמים המרחק בין מקום ראשון לשני הוא מאית שנייה — ושווה שנים של משמעת.</div>
+    </div>
+  </article>
+
+  <article class="story swim">
+    <div class="story-header"><div class="story-number">10</div><span class="story-icon">🐟</span><span class="sport-tag">שחייה</span><h3 class="story-title">אריק "הצלופח" — השחיין שלא ידע לשחות</h3><p class="story-subtitle">אריק מוסמבני • אולימפיאדת סידני</p><span class="story-year">2000</span></div>
+    <div class="story-body">
+      <p>אריק מוסמבני הגיע מגינאה המשוונית — מדינה אפריקאית קטנה בלי בריכות אולימפיות. הוא התאמן בנהר, כמעט לבד, שמונה חודשים לפני האולימפיאדה. הוא הוזמן במסגרת מכסה מיוחדת למדינות מתפתחות. באולימפיאדה בסידני, ביום הגמר של 100 מטר חופשי, <strong>שני היריבים שלו נפסלו בזינוק</strong> והוא נשאר לשחות לבד.</p>
+      <p>אריק ראה בריכה אולימפית לראשונה בחייו יום קודם. הוא זינק למים, שחה 50 מטר במהירות סבירה, ואז ב-50 מטר האחרונים פשוט נגמר לו האוויר. הוא שחה בקושי, נאבק, כמעט טבע. הקהל בסידני — 17,000 איש — <strong>קם על רגליו והחל לצעוק ולעודד אותו</strong> כאילו היה שחיין אולימפי מוביל. הוא סיים בזמן של <em>1:52.72</em>. אבל הוא סיים. אריק הפך מיד לכוכב עולמי, וקיבל את הכינוי "אריק הצלופח".</p>
+      <div class="moral">אין דבר שמעורר השראה יותר מאדם שמסרב להפסיק, גם כשכולם יודעים שהוא לא הולך לנצח.</div>
+    </div>
+  </article>
+
+  <article class="story ten">
+    <div class="story-header"><div class="story-number">11</div><span class="story-icon">🎾</span><span class="sport-tag">טניס</span><h3 class="story-title">הג'נטלמן ששינה את הטניס</h3><p class="story-subtitle">ארתור אש • גמר וימבלדון</p><span class="story-year">1975</span></div>
+    <div class="story-body">
+      <p>ארתור אש היה שחקן הטניס השחור הראשון שזכה בגרנד סלאם. בגמר וימבלדון 1975, הוא היה המתמודד המועדף פחות מול ג'ימי קונורס — הצעיר הגאוני, התוקפני, האלוף המכהן. אבל אש עשה משהו בלתי צפוי: במקום לשחק משחק שהוא יודע לשחק — כוח מול כוח — <strong>הוא שינה טקטיקה לחלוטין</strong>. הוא שיחק הרמות רכות, כדורי חתך, שבירות קצב. הוא גרם לקונורס המהיר להאט, לחכות, להסתבך. הוא ניצח — אחת ההפתעות הגדולות בהיסטוריה של הטניס.</p>
+      <p>אבל אש היה הרבה יותר משחקן. הוא נאבק כל חייו נגד האפרטהייד בדרום אפריקה, פעל להגברת מודעות לאיידס אחרי שנדבק בווירוס מעירוי דם, והפך לסמל של כבוד וצניעות. "לא משנה מה הצרות שלך, מצא דרך להיות חלק מהתשובה, לא חלק מהבעיה," אמר. הוא מת צעיר, בגיל 49, אבל הפך לסמל של "שחקן הג'נטלמן" — לא בגלל איך שניצח, אלא בגלל מי שהיה.</p>
+      <div class="moral">"הצלחה היא מסע, לא יעד. העשייה היא לעתים קרובות חשובה יותר מהתוצאה." — ארתור אש</div>
+    </div>
+  </article>
+
+  <article class="story extr">
+    <div class="story-header"><div class="story-number">12</div><span class="story-icon">🧗‍♂️</span><span class="sport-tag">ספורט אתגרי</span><h3 class="story-title">ללא חבל, ללא רשת, ללא טעויות</h3><p class="story-subtitle">אלכס הונולד • אל קפיטן, יוסמיטי</p><span class="story-year">2017</span></div>
+    <div class="story-body">
+      <p>אל-קפיטן הוא קיר גרניט אנכי בגובה 900 מטרים בפארק יוסמיטי, קליפורניה. טיפוס עליו עם חבלים לוקח לרוב יומיים. ב-3 ביוני 2017, אלכס הונולד החליט לטפס עליו בסגנון הכי קיצוני בעולם: <strong>Free Solo</strong> — בלי חבלים, בלי רשת ביטחון, בלי שום דבר למעט זוג נעלי טיפוס ושקית גיר. אם תיפול, תמות. פשוט ככה.</p>
+      <p>הוא יצא לדרך בשעה 5:32 בבוקר. במשך <strong>שלוש שעות וחמישים ושש דקות</strong> של טיפוס מתמשך הוא צעד על מדפי סלע ברוחב של מילימטרים בודדים, תפס אחיזות זעירות, וביצע את המהלך שכונה "Boulder Problem" — תנועה טכנית שבה כל משקל גופו מועבר לכף יד אחת. הוא סיים בשעה 9:28 בבוקר. הדוקומנטרי "Free Solo" זכה באוסקר. הוא אינו נטול פחד — הוא פשוט עבד במשך שנים כדי להפוך את הפחד לחבר, לא לאויב.</p>
+      <div class="moral">האומץ האמיתי אינו חוסר פחד — זה להכיר את הפחד כל כך טוב, שהוא הופך להיות המורה שלך.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">13</div><span class="story-icon">⏱️</span><span class="sport-tag">אתלטיקה</span><h3 class="story-title">מתחת לארבע דקות</h3><p class="story-subtitle">רוג'ר באניסטר • מסלול אייפלי, אוקספורד</p><span class="story-year">1954</span></div>
+    <div class="story-body">
+      <p>במשך עשרות שנים האמינו רופאים, מאמנים ועיתונאים שריצת מייל בפחות מארבע דקות היא <strong>בלתי אפשרית</strong> מבחינה ביולוגית. חלקם טענו שהגוף האנושי פשוט יתמוטט. רוג'ר באניסטר, סטודנט לרפואה בן 25 מאוקספורד, לא האמין בגבול הזה. הוא התאמן בשעות הפנאי בין הרצאות, לבד, בלי חסות וכמעט בלי צוות.</p>
+      <p>ב-6 במאי 1954, ברוח חזקה ובטמפרטורה קרה, הוא רץ את המיל האנגלי בזמן <strong>3:59.4</strong>. שני חברים גררו אותו לאורך המסלול כטייסי קצב, ובכניסה לישורת האחרונה הוא פרץ לבדו. כשחצה את קו הסיום הוא התמוטט אל זרועות הקהל. בתוך <strong>46 יום בלבד</strong>, היריב שלו ג'ון לנדי שבר את שיאו של באניסטר. בתוך שנה שברו אותו עוד עשרה רצים. הגבול מעולם לא היה פיזי — הוא היה בראש.</p>
+      <div class="moral">הקיר הכי קשה לשבור אינו הקיר שעומד מולך — הוא זה שאתה מניח שקיים.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">14</div><span class="story-icon">👣</span><span class="sport-tag">אתלטיקה</span><h3 class="story-title">יחף לזהב בשעת לילה ברומא</h3><p class="story-subtitle">אביבי ביקילה • אולימפיאדת רומא</p><span class="story-year">1960</span></div>
+    <div class="story-body">
+      <p>אביבי ביקילה היה חייל צנחנים אתיופי בלתי מוכר שהגיע לרומא ברגע האחרון, אחרי שאחד הרצים של הנבחרת נפצע. הנעליים שהספונסר הכין לו לא התאימו, שיפשפו את רגליו עד דם. ההחלטה שלו הייתה פשוטה: <strong>הוא ירוץ מרתון יחף</strong>. ב-2 בספטמבר 1960, בשעת ערב על כבישי אבני הבזלת הקדומים של רומא, הוא יצא לריצה של 42.195 קילומטרים.</p>
+      <p>למרבה האירוניה, המסלול עבר ליד <strong>אובליסק אכסום</strong> — מונומנט אתיופי עתיק שהאיטלקים בזזו מאדיסה במלחמת 1935. באותה הרומא שהשפילה את ארצו לפני דור אחד, רץ חייל אתיופי, יחף, והיה הראשון לחצות את קו הסיום. הוא שבר את שיא העולם בזמן 2:15:16. ארבע שנים אחר כך בטוקיו, עם נעליים הפעם, הוא זכה במדליה שנייה ושבר שוב את שיא העולם. הראשון בהיסטוריה לזכות בשתי מדליות זהב עוקבות במרתון.</p>
+      <div class="moral">לפעמים כלי העבודה הטובים ביותר הם אלה שהאדם נושא בתוך עצמו.</div>
+    </div>
+  </article>
+
+  <article class="story sci">
+    <div class="story-header"><div class="story-number">15</div><span class="story-icon">🪑</span><span class="sport-tag">מדע הספורט</span><h3 class="story-title">הקפיצה שנראתה מגוחכת — ושינתה הכל</h3><p class="story-subtitle">דיק פוסברי • אולימפיאדת מקסיקו סיטי</p><span class="story-year">1968</span></div>
+    <div class="story-body">
+      <p>במשך עשרות שנים קפיצה לגובה בוצעה בסגנון "המספריים" או "המתגלגל" — הקופץ קפץ רגל ראשונה, בטן כלפי מטה. דיק פוסברי, תלמיד תיכון באורגון, פשוט <strong>לא הצליח בסגנון הזה</strong>. מאמניו ייאשו עליו. אז הוא התחיל להתנסות — והגיע לטכניקה שנראתה בעיני כולם מטורפת: לרוץ אלכסונית אל המוט, להסתובב באוויר, ו<strong>לעבור מעליו על הגב, עם הראש ראשון</strong>.</p>
+      <p>באולימפיאדה במקסיקו סיטי, פוסברי ביצע את התרגיל המוזר שלו והקהל פרץ בצחוק. ואז הוא עבר 2.24 מטר וזכה בזהב. <strong>הביומכניקה מאחורי "ה-Flop"</strong> הייתה גאונית: מכיוון שמרכז הכובד של הגוף יכול לעבור <em>מתחת</em> למוט בזמן שהגוף מתעקם מעליו, הקופץ משקיע פחות אנרגיה על גובה מיותר. תוך עשור כל הקופצים בעולם עברו לסגנון הזה. היום 100% מהתחרויות האולימפיות משתמשות ב-Fosbury Flop. חוקי הפיזיקה לא השתנו — פוסברי פשוט הקשיב להם טוב יותר.</p>
+      <div class="moral">החדשנות הכי חזקה היא לא להתאמץ יותר — אלא לשאול מחדש את השאלות שכולם חדלו לשאול.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">16</div><span class="story-icon">✊🏿</span><span class="sport-tag">אתלטיקה</span><h3 class="story-title">האגרוף שדומם את העולם</h3><p class="story-subtitle">טומי סמית' וג'ון קרלוס • אולימפיאדת מקסיקו סיטי</p><span class="story-year">1968</span></div>
+    <div class="story-body">
+      <p>באותה אולימפיאדה של פוסברי, שני רצים אמריקאים, טומי סמית' וג'ון קרלוס, זכו במקומות הראשון והשלישי ב-200 מטר. בארצם, ברחובות אמריקה, אפרו-אמריקאים עדיין נאבקו על זכויות בסיסיות. כשעלו לפודיום עלה ההמנון האמריקאי — ושניהם, בסנכרון מושלם, <strong>הרכינו את ראשם והרימו אגרוף שחור מכוסה בכפפה שחורה אל השמיים</strong>. גם האוסטרלי פיטר נורמן, שזכה במקום השני, לבש סיכת זכויות אדם מתוך סולידריות.</p>
+      <p>התגובה הייתה מיידית: שני האמריקאים הושעו מהנבחרת ושולחו הביתה. הם ומשפחותיהם קיבלו איומי מוות במשך שנים. פיטר נורמן מעולם לא שוחק יותר באולימפיאדה בשם אוסטרליה. אבל <strong>התמונה הזו</strong> — שחור-לבן, מגדל של שני אגרופים — הפכה לאחד הסמלים החשובים בהיסטוריה של המאה ה-20. כשנורמן נפטר ב-2006, סמית' וקרלוס נשאו את ארונו. חברים לחיים, חיילי מצפון.</p>
+      <div class="moral">לפעמים השתיקה החזקה ביותר היא זו שמלווה תנועת גוף אחת, על פודיום שכל העולם רואה.</div>
+    </div>
+  </article>
+
+  <article class="story ath">
+    <div class="story-header"><div class="story-number">17</div><span class="story-icon">⚾</span><span class="sport-tag">בייסבול</span><h3 class="story-title">פריצת קיר הצבעים</h3><p class="story-subtitle">ג'קי רובינסון • ברוקלין דודג'רס</p><span class="story-year">1947</span></div>
+    <div class="story-body">
+      <p>עד 1947, הבייסבול של הליגה הגדולה באמריקה היה <strong>לבן בלבד</strong>. שחקנים שחורים שיחקו בליגות נפרדות, קיבלו שכר עלוב ולא הופיעו בטלוויזיה. ברנץ' ריקי, מנהל הברוקלין דודג'רס, חיפש שחקן שיוכל לשבור את הקיר — לא רק בכישרון, אלא גם בכושר נפשי לעמוד בכל ההשפלות שיבואו. הוא בחר בג'קי רובינסון. בפגישה ביניהם ריקי צעק עליו שעות כל מה שאוהדים גזענים יצעקו, וביקש ממנו להבטיח: <strong>"לא להגיב. לא פעם אחת. לא בחודש. לא בשנה."</strong></p>
+      <p>ב-15 באפריל 1947 רובינסון עלה למגרש בחולצת מספר 42. הוא ספג יריקות, איומי רצח, חברים לקבוצה שסירבו לשחק איתו, ומאמנים יריבים שניסו לפצוע אותו בכוונה. הוא לא הגיב. הוא פשוט <strong>שיחק את הבייסבול הטוב בעולם</strong> — זכה בשנתו הראשונה בתואר "Rookie of the Year", ובשנתיים לאחר מכן ב-MVP. היום ה-15 באפריל הוא יום ג'קי רובינסון בכל ליגת הבייסבול, והמספר 42 פרש לנצח בכל הקבוצות — רק הוא החזיק בו.</p>
+      <div class="moral">יש ניצחונות שנמדדים לא במה שאתה נותן לעולם — אלא במה שאתה מסרב לתת לו.</div>
+    </div>
+  </article>
+
+  <article class="story gym">
+    <div class="story-header"><div class="story-number">18</div><span class="story-icon">🥋</span><span class="sport-tag">ג'ודו</span><h3 class="story-title">המדליה הראשונה של ישראל</h3><p class="story-subtitle">יעל ארד • אולימפיאדת ברצלונה</p><span class="story-year">1992</span></div>
+    <div class="story-body">
+      <p>עד ברצלונה 1992, ישראל השתתפה ב-11 אולימפיאדות ולא הביאה הביתה מדליה אחת. יעל ארד, ג'ודוקה בת 25 מרמת גן, הגיעה לגמר משקל עד 61 ק"ג מול היפנית מיוקו נישיקאווה. המשחק היה צמוד ומתוח. ארד הפסידה 0.5 נקודות — והייתה <strong>סגנית אלופה אולימפית</strong>. המדליה הראשונה של ישראל בהיסטוריה.</p>
+      <p>כשהדגל הישראלי הונף על פודיום מספר שתיים ו"התקווה" לא נוגן (זהב ניגן את המנון המנצח), 24 שעות שלמות עמדה ישראל ברחובות. הכתבים לא הצליחו להגיע אליה — הטלפונים לא הפסיקו לצלצל. היום אחרי ניצח שחר אורן במשקל עד 78 ק"ג ברונזה, ובכך הכפיל את מספר המדליות הישראליות מאז ומעולם בתוך יום אחד. ארד אמרה באותו ערב: <em>"אני שמחה שהצלחתי להביא רגע של גאווה לעם שלי. אבל זה לא רק שלי — זה של כל אחד שחלם שיום אחד נהיה שם."</em></p>
+      <div class="moral">מדליה ראשונה אף פעם אינה של אדם אחד — היא של כל מי שחלם לפני שהיה אפשרי.</div>
+    </div>
+  </article>
+
+  <article class="story sci">
+    <div class="story-header"><div class="story-number">19</div><span class="story-icon">🏃‍♂️</span><span class="sport-tag">מדע הספורט</span><h3 class="story-title">מתחת לשעתיים</h3><p class="story-subtitle">אליוד קיפצ'וגה • פרויקט INEOS 1:59</p><span class="story-year">2019</span></div>
+    <div class="story-body">
+      <p>מומחי הפיזיולוגיה של המאמץ קבעו במשך שנים כי <strong>מרתון מתחת לשעתיים הוא גבול ביולוגי</strong>. חישוב ה-VO2 Max, קצב החלפת הפחמימות וסף החומצה הלקטית — כולם יחד רמזו שמרתון ב-1:59:xx הוא פנטזיה. אבל אליוד קיפצ'וגה, רץ קנייתי בן 35, והצוות שהעסיקה אותו חברת INEOS החליטו לבחון את הגבול במדויק. לא באולימפיאדה, אלא בוינה, במסלול משוכלל שהותאם לכל משתנה אפשרי.</p>
+      <p>הטכנולוגיה שפרסה אותו הייתה מדעית מדהימה: <strong>41 טייסי קצב</strong> סבבו אותו בצורת V הפוך כדי להפחית את גרר האוויר ב-85%. מכונית מסוג רכב חשמלי הלכה לפניו וקרינה קרני לייזר על הכביש כדי לשמור על התזמון המדויק. הוא לבש נעלי Nike Vaporfly, נשא את הג'לים האנרגטיים המיטביים, וירד במסלול המיטבי אחרי סדרת אימונים בגובה. ב-12 באוקטובר 2019, הוא סיים את 42.195 הקילומטרים בזמן של <strong>1:59:40</strong>. הזמן לא הוכר רשמית כשיא עולם (בגלל התנאים המבוקרים), אבל המסר היה חד: "<em>No human is limited</em>", כתב קיפצ'וגה על חולצתו. הגבול נשבר.</p>
+      <div class="moral">כשמדע, טכנולוגיה וגוף אנושי פועלים יחד במטרה אחת — "בלתי אפשרי" הופך לעובדה היסטורית.</div>
+    </div>
+  </article>
+
+  <article class="story sci">
+    <div class="story-header"><div class="story-number">20</div><span class="story-icon">👟</span><span class="sport-tag">מדע הספורט</span><h3 class="story-title">הנעל ששברה את כל השיאים</h3><p class="story-subtitle">מהפכת הסופר-שוז • 2016 והלאה</p><span class="story-year">2016</span></div>
+    <div class="story-body">
+      <p>ב-2016 Nike הציגה את נעלי <strong>ה-Vaporfly 4%</strong> — ושם הדגם לא היה שיווקי. מחקר בלתי תלוי שפורסם בכתב העת <em>Sports Medicine</em> מצא שהנעל הפחיתה את <strong>עלות האנרגיה של הריצה ב-4% בממוצע</strong>. זה אולי נשמע מעט, אבל במרתון זה שקול ל<strong>יותר משתי דקות</strong>. הסוד: קצף PEBA קל במיוחד, ופלטת סיב פחמן מעוקלת שמאחסנת ומשחררת אנרגיה עם כל צעד, כמו קפיץ.</p>
+      <p>התוצאות היו טקטוניות. בין 2017 ל-2020 נשברו <strong>שיאי עולם ב-5 מרחקים שונים</strong> — מ-5 ק"מ עד מרתון. רצי עילית שלא השתפרו בשנים זינקו בפתאומיות. איגוד האתלטיקה העולמי החל להתערב: קבע עובי סוליה מקסימלי של 40 מ"מ, הגביל את מספר הפלטות, אסר דגמי ניסוי. השאלה שהמדענים עדיין מתווכחים עליה: האם זו "טכנולוגיה הוגנת" כמו בגדי ים מהירים, או מעבר לקו? הוויכוח הזה משנה את ההגדרה של "הכי מהיר" — כל עוד מדובר בבני אדם, יש גבול שבו הציוד הופך להיות חלק מהספורטאי.</p>
+      <div class="moral">אם הטכנולוגיה מאפשרת לגוף שלך לרוץ יעיל יותר — האם זו עדיין <em>הריצה שלך</em>? תלוי על איזו נעל אתה עומד, ובאיזה שאלה.</div>
+    </div>
+  </article>
+
+</main>
+<footer class="footer">
+  <p class="footer-quote">"לספורט יש את הכוח לשנות את העולם. יש בו הכוח לעורר השראה. יש בו הכוח לאחד אנשים באופן שמעטים הדברים שמסוגלים לעשות זאת."</p>
+  <p class="footer-author">— נלסון מנדלה</p>
+  <p class="footer-tagline"><span>★</span> 20 סיפורים של תשוקה, אומץ, חדשנות וגדולה <span>★</span></p>
+</footer>
+<script>
+  document.querySelector('.scroll-arrow').addEventListener('click', () => { document.querySelector('.intro').scrollIntoView({ behavior: 'smooth' }); });
+  const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.style.opacity = '1'; entry.target.style.transform = 'translateY(0)'; } }); }, { threshold: 0.1 });
+  document.querySelectorAll('.story').forEach(story => { story.style.opacity = '0'; story.style.transform = 'translateY(40px)'; story.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out'; observer.observe(story); });
+</script>
+</body>
+</html>
