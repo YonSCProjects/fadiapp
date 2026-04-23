@@ -22,7 +22,7 @@
   }
   html { scroll-behavior: smooth; }
   body { font-family: 'Heebo', 'Rubik', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.7; overflow-x: hidden; }
-  .hero { min-height: 100vh; background: radial-gradient(circle at 15% 20%, rgba(249,115,22,0.25) 0%, transparent 45%), radial-gradient(circle at 85% 30%, rgba(8,145,178,0.25) 0%, transparent 45%), radial-gradient(circle at 50% 85%, rgba(22,163,74,0.25) 0%, transparent 45%), linear-gradient(135deg, #1e293b 0%, #0f172a 100%); position: relative; display: flex; align-items: center; justify-content: center; padding: 40px 20px; overflow: hidden; }
+  .hero { min-height: 60vh; background: radial-gradient(circle at 15% 20%, rgba(249,115,22,0.25) 0%, transparent 45%), radial-gradient(circle at 85% 30%, rgba(8,145,178,0.25) 0%, transparent 45%), radial-gradient(circle at 50% 85%, rgba(22,163,74,0.25) 0%, transparent 45%), linear-gradient(135deg, #1e293b 0%, #0f172a 100%); position: relative; display: flex; align-items: center; justify-content: center; padding: 50px 20px; overflow: hidden; }
   .hero::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 2px, transparent 2px), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 2px, transparent 2px); background-size: 80px 80px; opacity: 0.5; }
   .floating-emoji { position: absolute; font-size: 3rem; opacity: 0.35; animation: float 8s ease-in-out infinite; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
   .f1 { top: 10%; right: 8%; animation-delay: 0s; }
@@ -36,9 +36,11 @@
   .hero h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 20px; background: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -2px; }
   .hero h2 { font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 400; color: #cbd5e1; margin-bottom: 40px; max-width: 700px; margin-right: auto; margin-left: auto; }
   .sports-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 40px; }
-  .sport-chip { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: white; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s; cursor: pointer; user-select: none; }
-  .sport-chip:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .sport-chip { padding: 10px 22px; background: rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.12); border-radius: 50px; color: var(--ink); font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s; cursor: pointer; user-select: none; }
+  .sport-chip:hover { background: rgba(15,23,42,0.12); transform: translateY(-2px); }
   .sport-chip.active { background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%); color: #1e293b; border-color: transparent; font-weight: 700; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(249,115,22,0.45); }
+  .chips-section { background: var(--paper); padding: 20px 20px 60px; }
+  .chips-section .sports-grid { margin-top: 0; }
   .story.filter-hidden { display: none; }
   .scroll-arrow { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: white; font-size: 2rem; animation: bounce 2s infinite; z-index: 2; cursor: pointer; }
   @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
@@ -83,7 +85,17 @@
   .footer-author { color: #94a3b8; font-size: 1rem; }
   .footer-tagline { margin-top: 40px; color: #64748b; font-size: 0.95rem; }
   .footer-tagline span { color: #f97316; font-weight: 700; }
-  @media (max-width: 640px) { .story-header, .story-body { padding: 30px 25px; } .story-number { font-size: 3.5rem; left: 15px; } .intro { padding: 60px 20px 40px; } }
+  .letter { background: var(--paper); padding: 50px 20px 20px; }
+  .letter-card { max-width: 720px; margin: 0 auto; background: white; border-radius: 20px; padding: 55px 50px 45px; box-shadow: 0 20px 60px rgba(15,23,42,0.12); border: 1px solid rgba(0,0,0,0.05); position: relative; }
+  .letter-card::before { content: "✉️"; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(--paper); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 14px rgba(15,23,42,0.1); }
+  .letter-greeting { font-size: 1.7rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+  .letter-card p { font-size: 1.1rem; line-height: 1.9; color: #334155; margin-bottom: 18px; }
+  .letter-card p:last-of-type { margin-bottom: 0; }
+  .letter-card strong { color: var(--ath-dark); font-weight: 700; }
+  .qr-wrap { margin: 30px auto; text-align: center; padding: 25px; background: #fefce8; border-radius: 16px; border: 2px dashed var(--ath); }
+  .qr-image { max-width: 240px; width: 100%; height: auto; background: white; padding: 12px; border-radius: 12px; }
+  .qr-caption { margin-top: 14px !important; margin-bottom: 0 !important; color: var(--ath-dark); font-weight: 700; font-size: 1rem; }
+  @media (max-width: 640px) { .story-header, .story-body { padding: 30px 25px; } .story-number { font-size: 3.5rem; left: 15px; } .intro { padding: 60px 20px 40px; } .letter-card { padding: 45px 25px 35px; } .letter-greeting { font-size: 1.4rem; } .letter-card p { font-size: 1rem; line-height: 1.8; } }
 </style>
 </head>
 <body>
@@ -97,20 +109,40 @@
   <div class="hero-content">
     <h1>עולם הספורט של פאדי</h1>
     <h2>20 סיפורים מעוררי השראה מעולם הספורט — על גבורה, חדשנות, מדע וערכים שעיצבו את ההיסטוריה</h2>
-    <div class="sports-grid">
-      <div class="sport-chip">🤸 התעמלות</div>
-      <div class="sport-chip">🏃 אתלטיקה</div>
-      <div class="sport-chip">⚽ כדורגל</div>
-      <div class="sport-chip">🏀 כדורסל</div>
-      <div class="sport-chip">🏊 שחייה</div>
-      <div class="sport-chip">🎾 טניס</div>
-      <div class="sport-chip">🧗 ספורט אתגרי</div>
-      <div class="sport-chip">⚾ בייסבול</div>
-      <div class="sport-chip">🥋 ג'ודו</div>
-      <div class="sport-chip">🔬 מדע הספורט</div>
-    </div>
   </div>
   <div class="scroll-arrow">↓</div>
+</section>
+<section class="letter">
+  <div class="letter-card">
+    <p class="letter-greeting">פאדי יקר,</p>
+    <p>ברוך הבא להפתעה מהגמד/ה שלך.</p>
+    <p>אני לא מבינ/ה הרבה בספורט, בכושר ובענייני אורח חיים בריא, אז חשבתי — מה בכל זאת ישמש אותך?</p>
+    <p>אתה איש כל כך מוכשר וחרוץ, מגיע לך לאכול אוכל ביתי חם במהלך ימי העבודה הארוכים שלך. אז יש לך כאן <strong>כלי אוכל תרמי</strong> שישמור את התבשילים מהבילים במהלך כל היום.</p>
+    <p>חוצמזה, יש לך כאן <strong>אתר אינטרנט רק שלך</strong>, שמכיל 20 סיפורים מעוררי השראה על ספורט וספורטאים. אם תרצה, נוכל להוסיף לאתר הזה עוד מלא דברים — אבל בשביל זה תצטרך לגלות מי אני :-)</p>
+    <p>ועוד דבר — בניתי עבורך, בעזרת חבר, <strong>אפליקציה ליצירת שיעורי ספורט</strong>. כדי להוריד את האפליקציה סרוק עם הטלפון שלך את הקוד הבא:</p>
+    <div class="qr-wrap">
+      <img src="QRCode_APK_Download.png" alt="קוד QR להורדת האפליקציה" class="qr-image">
+      <p class="qr-caption">סרוק להורדת האפליקציה</p>
+    </div>
+    <p>אחרי שתוריד את הקובץ, הטלפון ישאל אותך אם אתה רוצה להתקין — ותאמר לו שכן.</p>
+    <p>שחק לך עם האפליקציה, ואם תגלה מי אני נוכל לחקור אותה ביחד.</p>
+    <p>האפליקציה הזאת היא בשלב התחלתי. אם היא תשמש אותך, ואם בכלל יהיה לך זמן וראש בשביל זה, אז נוכל ביחד להוסיף לה (כמעט) כל מה שתרצה.</p>
+    <p>ובסוף בסוף — יש גם כמה <strong>נשנושים בריאים</strong>. לא יודע כמה טעימים, אבל בריאים בטוח!</p>
+  </div>
+</section>
+<section class="chips-section">
+  <div class="sports-grid">
+    <div class="sport-chip">🤸 התעמלות</div>
+    <div class="sport-chip">🏃 אתלטיקה</div>
+    <div class="sport-chip">⚽ כדורגל</div>
+    <div class="sport-chip">🏀 כדורסל</div>
+    <div class="sport-chip">🏊 שחייה</div>
+    <div class="sport-chip">🎾 טניס</div>
+    <div class="sport-chip">🧗 ספורט אתגרי</div>
+    <div class="sport-chip">⚾ בייסבול</div>
+    <div class="sport-chip">🥋 ג'ודו</div>
+    <div class="sport-chip">🔬 מדע הספורט</div>
+  </div>
 </section>
 <section class="intro">
   <span class="quote-mark">"</span>
