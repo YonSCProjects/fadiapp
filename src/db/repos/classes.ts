@@ -1,9 +1,13 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { db } from '../client';
-import { classes, teachers, type Class, type NewClass, type Teacher } from '../schema';
+import { classes, teachers, type Class, type Teacher } from '../schema';
 
 export async function listClasses(): Promise<Class[]> {
-  return db.select().from(classes).where(isNull(classes.deleted_at)).orderBy(classes.grade);
+  return db
+    .select()
+    .from(classes)
+    .where(isNull(classes.deleted_at))
+    .orderBy(classes.name);
 }
 
 export async function getClass(id: string): Promise<Class | null> {
@@ -11,47 +15,90 @@ export async function getClass(id: string): Promise<Class | null> {
   return rows[0] ?? null;
 }
 
-export async function createClass(input: NewClass): Promise<Class> {
-  const [row] = await db.insert(classes).values(input).returning();
+export async function createClass(input: {
+  name: string;
+  grade?: number;
+  year?: number;
+  notes?: string | null;
+}): Promise<Class> {
+  const [row] = await db
+    .insert(classes)
+    .values({
+      name: input.name,
+      grade: input.grade ?? 9,
+      year: input.year ?? new Date().getFullYear(),
+      notes: input.notes ?? null,
+    })
+    .returning();
   return row!;
 }
 
-// Singleton defaults — the app is usable before the teacher has set up a real
-// class. Ensure a placeholder teacher + class exist so lesson_instances can
-// FK cleanly. Idempotent.
-export async function ensureDefaultTeacherAndClass(): Promise<{
-  teacher: Teacher;
-  class: Class;
-}> {
-  const [existingTeacher] = await db
+export async function updateClass(
+  id: string,
+  patch: {
+    name?: string;
+    grade?: number;
+    year?: number;
+    notes?: string | null;
+    educator_email?: string | null;
+  },
+): Promise<void> {
+  await db
+    .update(classes)
+    .set({ ...patch, updated_at: new Date() })
+    .where(eq(classes.id, id));
+}
+
+export async function softDeleteClass(id: string): Promise<void> {
+  const now = new Date();
+  await db
+    .update(classes)
+    .set({ deleted_at: now, updated_at: now })
+    .where(eq(classes.id, id));
+}
+
+export async function ensureDefaultTeacher(): Promise<Teacher> {
+  const [existing] = await db
     .select()
     .from(teachers)
     .where(isNull(teachers.deleted_at))
     .limit(1);
+  if (existing) return existing;
+  const [created] = await db
+    .insert(teachers)
+    .values({ display_name: 'אני', locale: 'he-IL' })
+    .returning();
+  return created!;
+}
 
-  const teacher =
-    existingTeacher ??
-    (await db
-      .insert(teachers)
-      .values({ display_name: 'אני', locale: 'he-IL' })
-      .returning())[0]!;
+// Default educator-named classes at the user's school. Seeded on first boot,
+// idempotent by name. Also retires the legacy placeholder if still present.
+const EDUCATOR_CLASSES = [
+  'מירי ואופיר',
+  'מירית',
+  'נטלי',
+  'תאיר',
+  'לירז',
+  'תובל',
+  'אופיר',
+] as const;
 
-  const [existingClass] = await db
+export async function seedEducatorClasses(): Promise<void> {
+  const existing = await db
     .select()
     .from(classes)
-    .where(and(isNull(classes.deleted_at)))
-    .limit(1);
+    .where(isNull(classes.deleted_at));
+  const existingNames = new Set(existing.map((c) => c.name));
 
-  const thisClass =
-    existingClass ??
-    (await db
-      .insert(classes)
-      .values({
-        name: 'כיתה ברירת מחדל',
-        grade: 9,
-        year: new Date().getFullYear(),
-      })
-      .returning())[0]!;
+  const placeholder = existing.find((c) => c.name === 'כיתה ברירת מחדל');
+  if (placeholder) {
+    await softDeleteClass(placeholder.id);
+  }
 
-  return { teacher, class: thisClass };
+  const year = new Date().getFullYear();
+  for (const name of EDUCATOR_CLASSES) {
+    if (!existingNames.has(name)) {
+      await db.insert(classes).values({ name, grade: 9, year });
+    }
+  }
 }

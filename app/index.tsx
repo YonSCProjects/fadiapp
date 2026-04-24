@@ -21,6 +21,8 @@ export default function Home() {
           <Card href="/(designer)" label={he.home.designerCta} theme={theme} />
           <Card href="/lessons" label={he.home.lessonsCta} theme={theme} />
           <Card href="/lessons" label={he.home.runnerCta} theme={theme} />
+          <Card href="/classes" label={he.home.classesCta} theme={theme} />
+          <Card href="/scores" label={he.home.scoresCta} theme={theme} />
           <Card href="/(docs)" label={he.home.docsCta} theme={theme} disabled />
         </View>
 

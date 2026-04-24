@@ -56,6 +56,7 @@ export const classes = sqliteTable(
     year: integer('year').notNull(),   // e.g. 2026
     students_count_cached: integer('students_count_cached').notNull().default(0),
     notes: text('notes'),
+    educator_email: text('educator_email'),
     ...timestamps,
   },
   (t) => ({
@@ -379,6 +380,37 @@ export const sync_log = sqliteTable(
 );
 
 // ---------------------------------------------------------------------------
+// class_scores — per-class-session behavior scoring (token economy).
+// One row per student per session. Emailed to the class educator at the
+// teacher's explicit action; never uploaded to Drive, never sent to LLM.
+// ---------------------------------------------------------------------------
+export const class_scores = sqliteTable(
+  'class_scores',
+  {
+    id: idCol(),
+    class_id: text('class_id')
+      .notNull()
+      .references(() => classes.id),
+    student_id: text('student_id')
+      .notNull()
+      .references(() => students.id),
+    date: text('date').notNull(), // ISO YYYY-MM-DD (local)
+    period: integer('period').notNull(), // 1-5
+    entry: integer('entry').notNull().default(0),       // כניסה 0/1
+    attendance: integer('attendance').notNull().default(0), // שהייה 0/1/2
+    execution: integer('execution').notNull().default(0),   // ביצוע 0/1
+    atmosphere: integer('atmosphere').notNull().default(0), // אווירה 0/1
+    personal_goal: integer('personal_goal').notNull().default(0), // מטרה אישית 0/1
+    bonus: integer('bonus').notNull().default(0),           // בונוס 0/1
+    ...timestamps,
+  },
+  (t) => ({
+    session_idx: index('idx_scores_session').on(t.class_id, t.date, t.period),
+    student_idx: index('idx_scores_student').on(t.student_id, t.date),
+  }),
+);
+
+// ---------------------------------------------------------------------------
 // Type exports
 // ---------------------------------------------------------------------------
 export type Teacher = typeof teachers.$inferSelect;
@@ -404,3 +436,5 @@ export type CoachingEvent = typeof coaching_events.$inferSelect;
 export type NewCoachingEvent = typeof coaching_events.$inferInsert;
 export type SyncLogRow = typeof sync_log.$inferSelect;
 export type NewSyncLogRow = typeof sync_log.$inferInsert;
+export type ClassScore = typeof class_scores.$inferSelect;
+export type NewClassScore = typeof class_scores.$inferInsert;

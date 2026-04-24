@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { inArray, isNull, and } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { activities, type Activity, type Lesson, type LessonBlock } from '@/db/schema';
+import { activities, type Activity, type Class, type Lesson, type LessonBlock } from '@/db/schema';
 import { getLesson, softDeleteLesson, updateLesson } from '@/db/repos/lessons';
-import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
+import { listClasses } from '@/db/repos/classes';
 import { createInstance } from '@/db/repos/lessonInstances';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
@@ -23,6 +23,8 @@ export default function LessonDetail() {
   const [whitelist, setWhitelist] = useState<Activity[]>([]);
   const [editingBlock, setEditingBlock] = useState<LessonBlock | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [classPickerOpen, setClassPickerOpen] = useState(false);
+  const [availableClasses, setAvailableClasses] = useState<Class[]>([]);
   const bottomPad = useBottomInset();
 
   const loadAll = useCallback(
@@ -61,10 +63,21 @@ export default function LessonDetail() {
 
   async function onStart() {
     if (lesson === null || lesson === 'missing') return;
-    const { class: defaultClass } = await ensureDefaultTeacherAndClass();
+    const rows = await listClasses();
+    if (rows.length === 0) {
+      Alert.alert(he.classes.title, he.classes.noneYet);
+      return;
+    }
+    setAvailableClasses(rows);
+    setClassPickerOpen(true);
+  }
+
+  async function onPickClass(cls: Class) {
+    if (lesson === null || lesson === 'missing') return;
+    setClassPickerOpen(false);
     const instance = await createInstance({
       lesson_id: lesson.id,
-      class_id: defaultClass.id,
+      class_id: cls.id,
       planned_blocks_json: lesson.blocks_json,
     });
     router.push(`/runner/${instance.id}` as never);
@@ -237,6 +250,34 @@ export default function LessonDetail() {
         onClose={() => setAddOpen(false)}
         onAdd={onAddBlock}
       />
+
+      <Modal
+        visible={classPickerOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setClassPickerOpen(false)}
+      >
+        <Pressable style={styles.pickerBackdrop} onPress={() => setClassPickerOpen(false)}>
+          <Pressable style={styles.pickerSheet} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.pickerTitle}>{he.classes.pickForLesson}</Text>
+            {availableClasses.map((c) => (
+              <Pressable
+                key={c.id}
+                style={styles.pickerRow}
+                onPress={() => onPickClass(c)}
+              >
+                <Text style={styles.pickerRowLabel}>{c.name}</Text>
+              </Pressable>
+            ))}
+            <Pressable
+              style={styles.pickerCancel}
+              onPress={() => setClassPickerOpen(false)}
+            >
+              <Text style={styles.pickerCancelLabel}>{he.lessons.cancel}</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }
@@ -362,4 +403,32 @@ const createStyles = (theme: ThemeTokens) =>
       lineHeight: 34,
       fontWeight: '300',
     },
+    pickerBackdrop: {
+      flex: 1,
+      backgroundColor: theme.bg.overlay,
+      justifyContent: 'flex-end',
+    },
+    pickerSheet: {
+      backgroundColor: theme.bg.subtle,
+      padding: 20,
+      gap: 8,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+    },
+    pickerTitle: {
+      color: theme.text.primary,
+      fontSize: 17,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginBottom: 6,
+    },
+    pickerRow: {
+      backgroundColor: theme.bg.card,
+      padding: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    pickerRowLabel: { color: theme.text.primary, fontSize: 17, fontWeight: '600' },
+    pickerCancel: { padding: 12, alignItems: 'center', marginTop: 4 },
+    pickerCancelLabel: { color: theme.text.muted, fontSize: 14 },
   });

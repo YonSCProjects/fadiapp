@@ -7,7 +7,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { ensureRtl } from '@/i18n/rtl';
 import { useDbMigrations } from '@/db/client';
 import { importSeedKb } from '@/kb/importer';
-import { ensureDefaultTeacherAndClass } from '@/db/repos/classes';
+import { ensureDefaultTeacher, seedEducatorClasses } from '@/db/repos/classes';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
 // Must run at module load, before expo-router mounts, so that when the OAuth
@@ -40,7 +40,8 @@ function AppShell() {
     if (!migrationsReady) return;
     (async () => {
       try {
-        await ensureDefaultTeacherAndClass();
+        await ensureDefaultTeacher();
+        await seedEducatorClasses();
         const result = await importSeedKb();
         if (__DEV__) console.log('[kb] imported:', result);
         setKbReady(true);
