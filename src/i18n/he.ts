@@ -9,7 +9,7 @@ export const he = {
     runnerSubtitle: 'בחר שיעור קיים כדי להתחיל',
     docsCta: 'תיעוד שיעור',
     classesCta: 'כיתות',
-    scoresCta: 'ציוני התנהגות',
+    scoresCta: 'ניקוד תוכנית התנהגותית',
     settingsCta: 'הגדרות',
     spikesHeader: 'בדיקות פיתוח',
     rtlSpike: 'בדיקת RTL בעברית',
@@ -86,7 +86,7 @@ export const he = {
     saveChanges: 'שמור שינויים',
   },
   scores: {
-    title: 'ציוני התנהגות',
+    title: 'ניקוד תוכנית התנהגותית',
     subtitle: 'הזן ציונים לכל תלמיד/ה ושלח במייל למחנכ/ת.',
     dateLabel: 'תאריך',
     classLabel: 'כיתה',
@@ -109,12 +109,15 @@ export const he = {
     noStudentsForClass: 'אין תלמידים ברשימה של הכיתה הזאת.',
     noMailApp: 'לא נמצאה אפליקציית מייל במכשיר.',
     mailSubject: (cls: string, date: string, period: number) =>
-      `ציוני התנהגות · ${cls} · ${date} · שיעור ${period}`,
+      `ניקוד תוכנית התנהגותית · ${cls} · ${date} · שיעור ${period}`,
     bodyHeader: (cls: string, date: string, period: number) =>
       `כיתה: ${cls}\nתאריך: ${date}\nשיעור מספר: ${period}\n`,
     bodyAbsent: 'לא נכח/ה',
     bodyFooter: 'נשלח מ-FadiApp',
     noClasses: 'אין כיתות. הוסף כיתה ראשונה במסך "כיתות".',
+    shareLinkLabel: 'קישור לגיליון המעקב',
+    sheetSyncFailed: 'הסנכרון לגיליון נכשל; הציונים נשמרו והמייל יישלח בלעדיו.',
+    sheetNoDriveToken: 'לא מחובר ל-Google Drive — הציונים לא ייסונכרנו לגיליון. ניתן להתחבר במסך "בדיקת Google Drive".',
   },
   runner: {
     title: 'שיעור פועל',

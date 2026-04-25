@@ -82,8 +82,10 @@ The SQLite schema lives at [src/db/schema.ts](src/db/schema.ts) (12 tables: teac
 Three invariants that survive any refactor:
 
 - `students.full_name_enc` and `students.medical_flags_json` are PII, encrypted, never uploaded to Drive plaintext, never sent to LLM.
-- Drive writes contain aggregate attendance counts only — never per-student names.
+- **Default Drive posture**: writes contain aggregate counts only — never per-student names. Currently the only sanctioned exception is the **scoring sheet** (see below). Adding any new exception requires updating this section and an explicit user-flow opt-in.
 - Every row has `id (ULID)`, `created_at`, `updated_at`, `deleted_at` (soft-delete), `sync_rev`, `drive_etag`. Use the `timestamps` helper in `schema.ts` — don't declare these per-table.
+
+**Sanctioned PII exception — scoring sheet** (`src/sync/scoresSheet.ts`): the token-economy scoring flow writes per-student rows (date, `students.display_label`, period, six 0/1/2 scores, sum) into a Google Sheets file in the teacher's own Drive (`drive.file` scope), one tab per class. The educator gets an "anyone with link" share URL appended to the per-session email. Justification: this is mandatory school-admin workflow that the teacher explicitly invokes per session; the data already leaves the device via the email itself. Do not extend this exception to other entities (reflections, attendance, lesson_instances) without re-confirming with the user.
 
 ## Seed knowledge base
 

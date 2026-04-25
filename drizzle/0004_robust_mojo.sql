@@ -1,0 +1,1 @@
+ALTER TABLE `teachers` ADD `scores_sheet_id` text;

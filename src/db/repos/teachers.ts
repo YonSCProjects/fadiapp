@@ -42,6 +42,17 @@ export async function setDriveFolderId(teacherId: string, folderId: string): Pro
     .where(eq(teachers.id, teacherId));
 }
 
+export async function setScoresSheetId(teacherId: string, sheetId: string): Promise<void> {
+  await db
+    .update(teachers)
+    .set({
+      scores_sheet_id: sheetId,
+      updated_at: new Date(),
+      sync_rev: sql`${teachers.sync_rev} + 1`,
+    })
+    .where(eq(teachers.id, teacherId));
+}
+
 // Default equipment catalog seeded on first read. Teachers edit freely from there.
 export const DEFAULT_EQUIPMENT_CATALOG_HE: string[] = [
   'כדורסל',

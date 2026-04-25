@@ -20,6 +20,13 @@ import {
   type ScoreInput,
 } from '@/db/repos/classScores';
 import { class_scores, type Class, type Student } from '@/db/schema';
+import { loadToken } from '@/sync/tokenStore';
+import {
+  ensureScoresSheet,
+  getShareUrl,
+  pushSessionRows,
+  type ScoreSheetRow,
+} from '@/sync/scoresSheet';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -173,6 +180,36 @@ export default function ScoresScreen() {
         }));
       await saveSessionScores(attendingRows);
 
+      // Best-effort sync to Google Sheets. If the teacher hasn't connected
+      // Drive (or the sync errors out), fall back to email-only.
+      let shareUrl: string | null = null;
+      let sheetWarning: string | null = null;
+      const token = await loadToken();
+      if (token) {
+        try {
+          const spreadsheetId = await ensureScoresSheet(token);
+          const sheetRows: ScoreSheetRow[] = rows
+            .filter((r) => r.present)
+            .map((r) => ({
+              date,
+              studentLabel: r.label,
+              period,
+              entry: r.entry,
+              attendance: r.attendance,
+              execution: r.execution,
+              atmosphere: r.atmosphere,
+              personal_goal: r.personal_goal,
+              bonus: r.bonus,
+            }));
+          await pushSessionRows(token, spreadsheetId, selectedClass.name, sheetRows);
+          shareUrl = getShareUrl(spreadsheetId);
+        } catch (err) {
+          sheetWarning = `${he.scores.sheetSyncFailed}\n${String(err)}`;
+        }
+      } else {
+        sheetWarning = he.scores.sheetNoDriveToken;
+      }
+
       const available = await MailComposer.isAvailableAsync();
       if (!available) {
         Alert.alert(he.scores.title, he.scores.noMailApp);
@@ -183,7 +220,7 @@ export default function ScoresScreen() {
       const result = await MailComposer.composeAsync({
         recipients: [selectedClass.educator_email],
         subject: he.scores.mailSubject(selectedClass.name, prettyDate(date), period),
-        body: buildMailBody(selectedClass.name, date, period, rows),
+        body: buildMailBody(selectedClass.name, date, period, rows, shareUrl),
         isHtml: false,
       });
 
@@ -192,6 +229,7 @@ export default function ScoresScreen() {
       } else if (result.status === 'cancelled') {
         Alert.alert(he.scores.title, he.scores.sendCancelled);
       }
+      if (sheetWarning) Alert.alert(he.scores.title, sheetWarning);
     } catch (err) {
       Alert.alert(he.scores.title, String(err));
     } finally {
@@ -513,6 +551,7 @@ function buildMailBody(
   date: string,
   period: number,
   rows: Row[],
+  shareUrl: string | null,
 ): string {
   const header = he.scores.bodyHeader(className, prettyDate(date), period);
   const lines: string[] = [header, ''];
@@ -542,6 +581,12 @@ function buildMailBody(
     lines.push(`  ${he.scores.fieldPersonalGoal}: ${r.personal_goal}`);
     lines.push(`  ${he.scores.fieldBonus}: ${r.bonus}`);
     lines.push(`  ${he.scores.total}: ${t}`);
+    lines.push('');
+  }
+
+  if (shareUrl) {
+    lines.push(`${he.scores.shareLinkLabel}:`);
+    lines.push(shareUrl);
     lines.push('');
   }
 

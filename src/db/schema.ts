@@ -36,6 +36,9 @@ export const teachers = sqliteTable('teachers', {
   google_sub: text('google_sub').unique(),
   school_name: text('school_name'),
   drive_folder_id: text('drive_folder_id'),
+  // ID of the "ניקוד תוכנית התנהגותית" Google Sheets file in the teacher's
+  // Drive. Created on first send from the scoring screen; reused thereafter.
+  scores_sheet_id: text('scores_sheet_id'),
   locale: text('locale').notNull().default('he-IL'),
   // Teacher preferences (editable from the designer and settings screens).
   // Null = use hardcoded defaults; array = explicit catalog/filter.
