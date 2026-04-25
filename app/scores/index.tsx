@@ -20,7 +20,8 @@ import {
   type ScoreInput,
 } from '@/db/repos/classScores';
 import { class_scores, type Class, type Student } from '@/db/schema';
-import { loadToken } from '@/sync/tokenStore';
+import { clearTokenSet } from '@/sync/tokenStore';
+import { getValidToken } from '@/sync/tokenRefresh';
 import {
   ensureScoresSheet,
   getShareUrl,
@@ -83,6 +84,9 @@ export default function ScoresScreen() {
   const [classPickerOpen, setClassPickerOpen] = useState(false);
   const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  // True if scores already exist locally for the current (class, date, period)
+  // — used to mark the email as an update rather than a fresh report.
+  const [isUpdate, setIsUpdate] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -116,6 +120,7 @@ export default function ScoresScreen() {
           isNull(class_scores.deleted_at),
         ),
       );
+    setIsUpdate(existing.length > 0);
     const byStudent = new Map(existing.map((e) => [e.student_id, e]));
     setRows(
       roster.map((s) => {
@@ -184,7 +189,7 @@ export default function ScoresScreen() {
       // Drive (or the sync errors out), fall back to email-only.
       let shareUrl: string | null = null;
       let sheetWarning: string | null = null;
-      const token = await loadToken();
+      const token = await getValidToken();
       if (token) {
         try {
           const spreadsheetId = await ensureScoresSheet(token);
@@ -204,7 +209,16 @@ export default function ScoresScreen() {
           await pushSessionRows(token, spreadsheetId, selectedClass.name, sheetRows);
           shareUrl = getShareUrl(spreadsheetId);
         } catch (err) {
-          sheetWarning = `${he.scores.sheetSyncFailed}\n${String(err)}`;
+          const errStr = String(err);
+          // Token expired (very common — Google access tokens last ~1 hour).
+          // Clear the stale token so the next attempt starts from a clean
+          // state, and surface a Hebrew message instead of the raw JSON.
+          if (errStr.includes('401')) {
+            await clearTokenSet();
+            sheetWarning = he.scores.sheetTokenExpired;
+          } else {
+            sheetWarning = `${he.scores.sheetSyncFailed}\n${errStr}`;
+          }
         }
       } else {
         sheetWarning = he.scores.sheetNoDriveToken;
@@ -217,15 +231,27 @@ export default function ScoresScreen() {
         return;
       }
 
+      const subject =
+        (isUpdate ? he.scores.mailSubjectUpdatePrefix : '') +
+        he.scores.mailSubject(selectedClass.name, prettyDate(date), period);
       const result = await MailComposer.composeAsync({
         recipients: [selectedClass.educator_email],
-        subject: he.scores.mailSubject(selectedClass.name, prettyDate(date), period),
-        body: buildMailBody(selectedClass.name, date, period, rows, shareUrl),
+        subject,
+        body: buildMailBody(
+          selectedClass.name,
+          date,
+          period,
+          rows,
+          shareUrl,
+          isUpdate,
+        ),
         isHtml: false,
       });
 
       if (result.status === 'sent') {
         Alert.alert(he.scores.title, he.scores.sentOk);
+        // Subsequent sends for this same session are now updates.
+        setIsUpdate(true);
       } else if (result.status === 'cancelled') {
         Alert.alert(he.scores.title, he.scores.sendCancelled);
       }
@@ -552,9 +578,15 @@ function buildMailBody(
   period: number,
   rows: Row[],
   shareUrl: string | null,
+  isUpdate: boolean,
 ): string {
   const header = he.scores.bodyHeader(className, prettyDate(date), period);
-  const lines: string[] = [header, ''];
+  const lines: string[] = [];
+  if (isUpdate) {
+    lines.push(`** ${he.scores.bodyUpdateNote} **`);
+    lines.push('');
+  }
+  lines.push(header, '');
 
   for (const r of rows) {
     if (!r.present) {
@@ -696,7 +728,9 @@ const createStyles = (theme: ThemeTokens) =>
     },
     scoreLabel: { color: theme.text.primary, fontSize: 14, flex: 1 },
     segment: {
-      flexDirection: 'row',
+      // Numbers should read left-to-right (0, 1, 2) regardless of the
+      // surrounding RTL flow. row-reverse inverts the axis under forceRTL.
+      flexDirection: 'row-reverse',
       borderRadius: 8,
       overflow: 'hidden',
       backgroundColor: theme.bg.input,

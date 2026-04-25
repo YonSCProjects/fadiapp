@@ -110,6 +110,8 @@ export const he = {
     noMailApp: 'לא נמצאה אפליקציית מייל במכשיר.',
     mailSubject: (cls: string, date: string, period: number) =>
       `ניקוד תוכנית התנהגותית · ${cls} · ${date} · שיעור ${period}`,
+    mailSubjectUpdatePrefix: '[עדכון] ',
+    bodyUpdateNote: 'עדכון לציונים שנשלחו בהודעה קודמת.',
     bodyHeader: (cls: string, date: string, period: number) =>
       `כיתה: ${cls}\nתאריך: ${date}\nשיעור מספר: ${period}\n`,
     bodyAbsent: 'לא נכח/ה',
@@ -118,6 +120,7 @@ export const he = {
     shareLinkLabel: 'קישור לגיליון המעקב',
     sheetSyncFailed: 'הסנכרון לגיליון נכשל; הציונים נשמרו והמייל יישלח בלעדיו.',
     sheetNoDriveToken: 'לא מחובר ל-Google Drive — הציונים לא ייסונכרנו לגיליון. ניתן להתחבר במסך "בדיקת Google Drive".',
+    sheetTokenExpired: 'החיבור ל-Google Drive פג תוקף. הציונים נשמרו והמייל יישלח. להמשך סנכרון, התחבר מחדש במסך "בדיקת Google Drive".',
   },
   runner: {
     title: 'שיעור פועל',

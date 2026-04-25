@@ -82,6 +82,22 @@ export async function uploadJson(
   return (await res.json()) as DriveFile;
 }
 
+// Fetches a file's metadata. Returns null if the file is gone (404). Includes
+// the `trashed` flag — a trashed file still resolves via the Sheets API, so
+// callers must check this rather than relying on a 404 to detect deletion.
+export async function getFileMeta(
+  token: string,
+  fileId: string,
+): Promise<(DriveFile & { trashed: boolean }) | null> {
+  const res = await fetch(
+    `${DRIVE}/files/${fileId}?fields=id,name,modifiedTime,mimeType,trashed`,
+    { headers: { authorization: `Bearer ${token}` } },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`drive meta ${res.status}: ${await res.text()}`);
+  return (await res.json()) as DriveFile & { trashed: boolean };
+}
+
 export async function downloadFileText(token: string, fileId: string): Promise<string> {
   const res = await fetch(`${DRIVE}/files/${fileId}?alt=media`, {
     headers: { authorization: `Bearer ${token}` },

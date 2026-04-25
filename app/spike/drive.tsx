@@ -12,7 +12,8 @@ import {
   uploadJson,
   type UserInfo,
 } from '@/sync/drive';
-import { clearToken, loadToken, saveToken } from '@/sync/tokenStore';
+import { clearTokenSet, saveTokenSet } from '@/sync/tokenStore';
+import { getValidToken } from '@/sync/tokenRefresh';
 import { he } from '@/i18n/he';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -41,22 +42,43 @@ export default function DriveSpike() {
     iosClientId: extra.googleClientIdIos,
     androidClientId: extra.googleClientIdAndroid,
     scopes: SCOPES,
+    // Request offline access so Google issues a refresh token.
+    // prompt=consent forces the consent screen on every sign-in so the
+    // refresh token is reliably issued (Google may skip it if the user has
+    // already consented in a prior session).
+    extraParams: { access_type: 'offline', prompt: 'consent' },
   });
 
   useEffect(() => {
-    loadToken().then((t) => {
+    // getValidToken auto-refreshes if the access token has expired and a
+    // refresh token is available. Returns null if user must re-sign-in.
+    getValidToken().then((t) => {
       if (t) {
         setToken(t);
-        getUserInfo(t).then(setUser).catch(() => clearToken().then(() => setToken(null)));
+        getUserInfo(t)
+          .then(setUser)
+          .catch(() => clearTokenSet().then(() => setToken(null)));
       }
     });
   }, []);
 
   useEffect(() => {
     if (response?.type === 'success' && response.authentication?.accessToken) {
-      const t = response.authentication.accessToken;
-      saveToken(t).then(() => setToken(t));
-      getUserInfo(t).then(setUser).catch((e) => append(`userinfo error: ${e}`));
+      const auth = response.authentication;
+      const tokenSet = {
+        accessToken: auth.accessToken,
+        refreshToken: auth.refreshToken ?? null,
+        expiresAt: auth.expiresIn
+          ? Date.now() + auth.expiresIn * 1000
+          : 0,
+      };
+      saveTokenSet(tokenSet).then(() => setToken(auth.accessToken));
+      if (!auth.refreshToken) {
+        append('warning: no refresh token issued — sign-out + re-sign-in to retry');
+      }
+      getUserInfo(auth.accessToken)
+        .then(setUser)
+        .catch((e) => append(`userinfo error: ${e}`));
     } else if (response?.type === 'error') {
       append(`auth error: ${response.error?.description ?? response.error?.code ?? 'unknown'}`);
     }
@@ -96,7 +118,7 @@ export default function DriveSpike() {
   }
 
   async function signOut() {
-    await clearToken();
+    await clearTokenSet();
     setToken(null);
     setUser(null);
     setLog([]);

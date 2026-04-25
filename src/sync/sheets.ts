@@ -110,6 +110,35 @@ export async function deleteTab(
   await batchUpdate(token, spreadsheetId, [{ deleteSheet: { sheetId } }]);
 }
 
+// Reads a range; returns rows as string[][]. Empty rows below the data are
+// trimmed by Sheets unless we explicitly request majorDimension/values
+// rendering options. Default is fine for our use case.
+export async function getRange(
+  token: string,
+  spreadsheetId: string,
+  tabTitle: string,
+  range: string, // e.g. "A2:J"
+): Promise<string[][]> {
+  const escapedTitle = encodeURIComponent(`'${tabTitle.replace(/'/g, "''")}'`);
+  const fullRange = encodeURIComponent(`!${range}`);
+  const url = `${SHEETS}/${spreadsheetId}/values/${escapedTitle}${fullRange}`;
+  const res = await authedJson<{ values?: string[][] }>(token, url);
+  return res.values ?? [];
+}
+
+// Clears the values in a range (does not affect formatting).
+export async function clearRange(
+  token: string,
+  spreadsheetId: string,
+  tabTitle: string,
+  range: string,
+): Promise<void> {
+  const escapedTitle = encodeURIComponent(`'${tabTitle.replace(/'/g, "''")}'`);
+  const fullRange = encodeURIComponent(`!${range}`);
+  const url = `${SHEETS}/${spreadsheetId}/values/${escapedTitle}${fullRange}:clear`;
+  await authedJson<unknown>(token, url, { method: 'POST', body: '{}' });
+}
+
 // Writes the header row (A1:J1) of the given tab. Caller passes the tab
 // title (sheet name); the Sheets values API resolves it to a range.
 export async function writeRange(
