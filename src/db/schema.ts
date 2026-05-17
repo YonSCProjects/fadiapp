@@ -60,10 +60,36 @@ export const classes = sqliteTable(
     students_count_cached: integer('students_count_cached').notNull().default(0),
     notes: text('notes'),
     educator_email: text('educator_email'),
+    // Consolidated "design profile" — a short Hebrew preference summary
+    // distilled by the LLM from the teacher's design_feedback rows for this
+    // class. Injected into the lesson-designer prompt when this class is
+    // selected. Null until the teacher gives feedback. See src/llm/
+    // profileConsolidator.ts.
+    design_profile_he: text('design_profile_he'),
     ...timestamps,
   },
   (t) => ({
     grade_year_idx: index('idx_classes_grade_year').on(t.grade, t.year),
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// design_feedback — raw teacher feedback on the lessons the app designs for a
+// class ("more games, fewer drills", "warmups run long"). Consolidated by the
+// LLM into classes.design_profile_he. The app "learning" loop.
+// ---------------------------------------------------------------------------
+export const design_feedback = sqliteTable(
+  'design_feedback',
+  {
+    id: idCol(),
+    class_id: text('class_id')
+      .notNull()
+      .references(() => classes.id),
+    text_he: text('text_he').notNull(),
+    ...timestamps,
+  },
+  (t) => ({
+    class_idx: index('idx_design_feedback_class').on(t.class_id),
   }),
 );
 
@@ -441,3 +467,5 @@ export type SyncLogRow = typeof sync_log.$inferSelect;
 export type NewSyncLogRow = typeof sync_log.$inferInsert;
 export type ClassScore = typeof class_scores.$inferSelect;
 export type NewClassScore = typeof class_scores.$inferInsert;
+export type DesignFeedback = typeof design_feedback.$inferSelect;
+export type NewDesignFeedback = typeof design_feedback.$inferInsert;

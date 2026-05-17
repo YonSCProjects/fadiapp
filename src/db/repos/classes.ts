@@ -57,6 +57,16 @@ export async function softDeleteClass(id: string): Promise<void> {
     .where(eq(classes.id, id));
 }
 
+export async function setDesignProfile(
+  id: string,
+  profile: string | null,
+): Promise<void> {
+  await db
+    .update(classes)
+    .set({ design_profile_he: profile, updated_at: new Date() })
+    .where(eq(classes.id, id));
+}
+
 export async function ensureDefaultTeacher(): Promise<Teacher> {
   const [existing] = await db
     .select()

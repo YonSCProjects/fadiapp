@@ -29,6 +29,10 @@ export type DesignerConstraints = {
   equipmentAvailableHe: string[];
   preferredModel: PedagogicalModel | 'auto';
   specialConsiderationsHe?: string;
+  // Consolidated per-class design profile (classes.design_profile_he), set
+  // when the teacher picked a class in the designer. The accumulated, LLM-
+  // distilled record of what the teacher wants changed for this class.
+  classProfileHe?: string;
 };
 
 export type GeneratedLesson = {
@@ -128,6 +132,11 @@ export function buildUserMessage(constraints: DesignerConstraints, activities: A
   const considerations = constraints.specialConsiderationsHe?.trim()
     ? `\n\nהתחשבויות מיוחדות: ${constraints.specialConsiderationsHe}`
     : '';
+  const profile = constraints.classProfileHe?.trim()
+    ? `\n\n## העדפות שנלמדו עבור הכיתה הזאת
+המורה ציין לאורך זמן את ההעדפות הבאות לגבי שיעורים לכיתה זו. תכנן את השיעור כך שיכבד אותן, כל עוד אינן סותרות את המטרה, הבטיחות או האילוצים:
+${constraints.classProfileHe.trim()}`
+    : '';
 
   return `## אילוצי השיעור
 
@@ -137,7 +146,7 @@ export function buildUserMessage(constraints: DesignerConstraints, activities: A
 - מספר תלמידים: ${constraints.classSize}
 - מטרה: ${constraints.goalHe}
 - ציוד זמין: ${constraints.equipmentAvailableHe.length > 0 ? constraints.equipmentAvailableHe.join(', ') : 'ללא ציוד מיוחד'}
-- ${modelGuidance}${considerations}
+- ${modelGuidance}${considerations}${profile}
 
 ## רשימת פעילויות זמינות
 ניתן להשתמש רק במזהים שמופיעים כאן. השתמש ב-id המוצג (לא בשם).

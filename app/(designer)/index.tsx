@@ -21,11 +21,12 @@ import {
   setDisabledModels,
   setEquipmentCatalog,
 } from '@/db/repos/teachers';
+import { listClasses } from '@/db/repos/classes';
 import { EquipmentManagerModal } from '@/ui/EquipmentManagerModal';
 import { ModelManagerModal } from '@/ui/ModelManagerModal';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { ThemeTokens } from '@/theme/tokens';
-import type { Activity, PedagogicalModel } from '@/db/schema';
+import type { Activity, Class, PedagogicalModel } from '@/db/schema';
 import { and, inArray, isNull } from 'drizzle-orm';
 import { activities } from '@/db/schema';
 import { db } from '@/db/client';
@@ -80,11 +81,16 @@ export default function DesignerHome() {
   const [disabledModels, setDisabledModelsState] = useState<string[]>([]);
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [modelModalOpen, setModelModalOpen] = useState(false);
+  // Optional class selection — when set, the class's learned design profile
+  // is injected into the designer prompt.
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
   useEffect(() => {
     getRecentDistinctGoals(8).then(setRecentGoals).catch(() => {});
     getEquipmentCatalog().then(setEquipmentCatalogState).catch(() => {});
     getDisabledModels().then(setDisabledModelsState).catch(() => {});
+    listClasses().then(setClasses).catch(() => {});
   }, []);
 
   const modelOptions = useMemo(
@@ -122,6 +128,7 @@ export default function DesignerHome() {
     setPhase('generating');
     let buffered = '';
     try {
+      const selectedClass = classes.find((c) => c.id === selectedClassId);
       const constraints: DesignerConstraints = {
         grade,
         durationMin,
@@ -131,6 +138,7 @@ export default function DesignerHome() {
         equipmentAvailableHe: Array.from(equipment),
         preferredModel,
         specialConsiderationsHe: specialHe.trim() || undefined,
+        classProfileHe: selectedClass?.design_profile_he ?? undefined,
       };
       const result = await designLesson(constraints, {
         onTextDelta: (delta) => {
@@ -194,6 +202,9 @@ export default function DesignerHome() {
       <Stack.Screen options={{ title: he.designer.title }} />
       {phase === 'gather' && (
         <GatherForm
+          classes={classes}
+          selectedClassId={selectedClassId}
+          setSelectedClassId={setSelectedClassId}
           grade={grade}
           setGrade={setGrade}
           durationMin={durationMin}
@@ -292,6 +303,9 @@ function useStyles() {
 }
 
 function GatherForm(props: {
+  classes: Class[];
+  selectedClassId: string | null;
+  setSelectedClassId: (id: string | null) => void;
   grade: number;
   setGrade: (n: number) => void;
   durationMin: 30 | 45 | 60 | 90;
@@ -333,6 +347,40 @@ function GatherForm(props: {
       // before the keyboard-dismiss handler consumes them.
       keyboardShouldPersistTaps="handled"
     >
+      {props.classes.length > 0 && (
+        <Field label={he.designer.designForClass}>
+          <View style={styles.chipsRow}>
+            <Text
+              onPress={() => props.setSelectedClassId(null)}
+              style={[
+                styles.chip,
+                props.selectedClassId === null && styles.chipSelected,
+              ]}
+            >
+              {he.designer.classNone}
+            </Text>
+            {props.classes.map((c) => {
+              const selected = props.selectedClassId === c.id;
+              return (
+                <Text
+                  key={c.id}
+                  onPress={() => props.setSelectedClassId(c.id)}
+                  style={[styles.chip, selected && styles.chipSelected]}
+                >
+                  {c.name}
+                </Text>
+              );
+            })}
+          </View>
+          {(() => {
+            const sel = props.classes.find((c) => c.id === props.selectedClassId);
+            return sel?.design_profile_he ? (
+              <Text style={styles.profileHint}>{he.designer.profileActive}</Text>
+            ) : null;
+          })()}
+        </Field>
+      )}
+
       <Field label={he.designer.grade}>
         <Chips
           options={GRADES as unknown as number[]}
@@ -667,6 +715,7 @@ const createStyles = (theme: ThemeTokens) =>
       alignItems: 'center',
     },
     fieldAction: { color: theme.accent.link, fontSize: 13 },
+    profileHint: { color: theme.accent.link, fontSize: 12, marginTop: 4 },
     input: {
       backgroundColor: theme.bg.input,
       color: theme.text.primary,

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
@@ -11,6 +12,7 @@ import {
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   getClass,
+  setDesignProfile,
   softDeleteClass,
   updateClass,
 } from '@/db/repos/classes';
@@ -20,7 +22,13 @@ import {
   softDeleteStudent,
   updateStudent,
 } from '@/db/repos/students';
-import type { Class, Student } from '@/db/schema';
+import {
+  addFeedback,
+  listFeedbackForClass,
+  softDeleteFeedback,
+} from '@/db/repos/designFeedback';
+import { consolidateProfile } from '@/llm/profileConsolidator';
+import type { Class, DesignFeedback, Student } from '@/db/schema';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -36,6 +44,11 @@ export default function ClassDetail() {
   const [email, setEmail] = useState('');
   const [students, setStudents] = useState<Student[]>([]);
   const [newStudentName, setNewStudentName] = useState('');
+  // Learning loop state.
+  const [feedback, setFeedback] = useState<DesignFeedback[]>([]);
+  const [newFeedback, setNewFeedback] = useState('');
+  const [profileDraft, setProfileDraft] = useState('');
+  const [consolidating, setConsolidating] = useState(false);
   const bottomPad = useBottomInset();
 
   const load = useCallback(
@@ -47,11 +60,14 @@ export default function ClassDetail() {
         return;
       }
       const roster = await listStudentsInClass(id);
+      const fb = await listFeedbackForClass(id);
       if (!active()) return;
       setCls(row);
       setName(row.name);
       setEmail(row.educator_email ?? '');
       setStudents(roster);
+      setFeedback(fb);
+      setProfileDraft(row.design_profile_he ?? '');
     },
     [id],
   );
@@ -114,6 +130,42 @@ export default function ClassDetail() {
   async function onRemoveStudent(studentId: string) {
     await softDeleteStudent(studentId);
     await reloadStudents();
+  }
+
+  // Re-runs the LLM consolidation over the current feedback set and reflects
+  // the new profile in the editor. Feedback is already persisted by the time
+  // this runs, so a failure here only means "profile not updated yet".
+  async function reconsolidate() {
+    setConsolidating(true);
+    try {
+      const profile = await consolidateProfile(id);
+      setProfileDraft(profile);
+    } catch {
+      Alert.alert(he.classes.learningLabel, he.classes.consolidateFailed);
+    } finally {
+      setConsolidating(false);
+    }
+  }
+
+  async function onAddFeedback() {
+    const text = newFeedback.trim();
+    if (text.length === 0) return;
+    await addFeedback(id, text);
+    setNewFeedback('');
+    setFeedback(await listFeedbackForClass(id));
+    await reconsolidate();
+  }
+
+  async function onRemoveFeedback(feedbackId: string) {
+    await softDeleteFeedback(feedbackId);
+    setFeedback(await listFeedbackForClass(id));
+    await reconsolidate();
+  }
+
+  async function onSaveProfile() {
+    const trimmed = profileDraft.trim();
+    await setDesignProfile(id, trimmed.length > 0 ? trimmed : null);
+    Alert.alert(he.classes.learningLabel, he.classes.saveChanges);
   }
 
   if (cls === null) {
@@ -201,6 +253,78 @@ export default function ClassDetail() {
             <Text style={styles.addStudentLabel}>+</Text>
           </Pressable>
         </View>
+
+        {/* ---- Learning loop ---- */}
+        <Text style={[styles.fieldLabel, styles.sectionSpacer]}>
+          {he.classes.learningLabel}
+        </Text>
+        <Text style={styles.learningSubtitle}>{he.classes.learningSubtitle}</Text>
+
+        <View style={styles.profileHeader}>
+          <Text style={styles.profileLabelText}>{he.classes.profileLabel}</Text>
+          {consolidating && (
+            <View style={styles.consolidatingRow}>
+              <ActivityIndicator size="small" color={theme.accent.link} />
+              <Text style={styles.consolidatingText}>{he.classes.consolidating}</Text>
+            </View>
+          )}
+        </View>
+        <TextInput
+          value={profileDraft}
+          onChangeText={setProfileDraft}
+          style={[styles.input, styles.profileBox]}
+          textAlign="right"
+          textAlignVertical="top"
+          multiline
+          editable={!consolidating}
+          placeholder={
+            feedback.length === 0
+              ? he.classes.profileEmpty
+              : he.classes.profilePlaceholder
+          }
+          placeholderTextColor={theme.text.faint}
+        />
+        <Pressable style={styles.secondaryBtn} onPress={onSaveProfile}>
+          <Text style={styles.secondaryBtnLabel}>{he.classes.saveProfile}</Text>
+        </Pressable>
+
+        <View style={styles.addStudentRow}>
+          <TextInput
+            value={newFeedback}
+            onChangeText={setNewFeedback}
+            style={[styles.input, styles.flex1]}
+            textAlign="right"
+            placeholder={he.classes.feedbackPlaceholder}
+            placeholderTextColor={theme.text.faint}
+            onSubmitEditing={onAddFeedback}
+          />
+          <Pressable style={styles.addStudentBtn} onPress={onAddFeedback}>
+            <Text style={styles.addStudentLabel}>+</Text>
+          </Pressable>
+        </View>
+        <Text style={styles.piiHint}>{he.classes.feedbackPiiHint}</Text>
+
+        {feedback.length > 0 && (
+          <>
+            <Text style={[styles.fieldLabel, styles.feedbackHistoryLabel]}>
+              {he.classes.feedbackHistory}
+            </Text>
+            <View style={styles.studentList}>
+              {feedback.map((f) => (
+                <View key={f.id} style={styles.feedbackRow}>
+                  <Text style={styles.feedbackText}>{f.text_he}</Text>
+                  <Pressable
+                    onPress={() => onRemoveFeedback(f.id)}
+                    hitSlop={12}
+                    style={styles.removeBtn}
+                  >
+                    <Text style={styles.removeLabel}>×</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
 
         <Pressable style={styles.primaryBtn} onPress={onSave}>
           <Text style={styles.primaryBtnLabel}>{he.classes.saveChanges}</Text>
@@ -298,6 +422,52 @@ const createStyles = (theme: ThemeTokens) =>
       justifyContent: 'center',
     },
     addStudentLabel: { color: theme.accent.primaryText, fontSize: 22, lineHeight: 24 },
+    learningSubtitle: {
+      color: theme.text.muted,
+      fontSize: 13,
+      lineHeight: 19,
+      marginTop: 2,
+      marginBottom: 6,
+    },
+    profileHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    profileLabelText: { color: theme.text.secondary, fontSize: 14, fontWeight: '600' },
+    consolidatingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    consolidatingText: { color: theme.accent.link, fontSize: 12 },
+    profileBox: { minHeight: 96, lineHeight: 22 },
+    secondaryBtn: {
+      padding: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.border.default,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    secondaryBtnLabel: { color: theme.text.secondary, fontSize: 14, fontWeight: '600' },
+    piiHint: { color: theme.text.faint, fontSize: 12, marginTop: 4 },
+    feedbackHistoryLabel: { marginTop: 14 },
+    feedbackRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: theme.bg.card,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.border.subtle,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+    },
+    feedbackText: {
+      flex: 1,
+      color: theme.text.secondary,
+      fontSize: 14,
+      lineHeight: 20,
+      paddingVertical: 6,
+    },
     primaryBtn: {
       backgroundColor: theme.accent.primary,
       padding: 14,

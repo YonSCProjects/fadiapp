@@ -84,6 +84,20 @@ export const he = {
     studentNamePlaceholder: 'שם פרטי (ואות ראשונה של משפחה)',
     removeStudent: 'מחק',
     saveChanges: 'שמור שינויים',
+    learningLabel: 'למידה — שיפור השיעורים',
+    learningSubtitle:
+      'תן משוב על השיעורים שהאפליקציה מתכננת לכיתה הזאת. האפליקציה תסיק מסקנות ותתאים את התכנון הבא.',
+    profileLabel: 'מה האפליקציה למדה',
+    profileEmpty: 'האפליקציה עוד לא למדה דבר. הוסף משוב ראשון למטה.',
+    profilePlaceholder: 'מה שהאפליקציה למדה יופיע כאן',
+    saveProfile: 'שמירה',
+    feedbackPlaceholder: 'למשל: יותר משחקים ופחות תרגילים טכניים',
+    feedbackPiiHint: 'טיפ: אל תכתוב שמות תלמידים במשוב.',
+    addFeedback: 'הוסף משוב',
+    feedbackHistory: 'משובים קודמים',
+    consolidating: 'מעדכן את מה שנלמד…',
+    consolidateFailed:
+      'המשוב נשמר. עדכון הפרופיל נכשל (בעיית רשת?) — ינוסה שוב במשוב הבא.',
   },
   scores: {
     title: 'ניקוד תוכנית התנהגותית',
@@ -187,6 +201,9 @@ export const he = {
     cooldown: 'שחרור',
     activities: 'פעילויות',
     errorPrefix: 'שגיאה: ',
+    designForClass: 'תכנון עבור כיתה',
+    classNone: 'ללא כיתה',
+    profileActive: 'האפליקציה תתאים את השיעור להעדפות שנלמדו לכיתה זו ✓',
   },
   rtlSpike: {
     title: 'שיעור חדש',
