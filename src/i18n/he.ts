@@ -65,6 +65,13 @@ export const he = {
     title: 'הגדרות',
     themeLabel: 'ערכת צבעים',
     themeSubtitle: 'בחר את המראה המועדף עליך. ניתן לשנות בכל עת.',
+    learnedLabel: 'מה האפליקציה למדה',
+    learnedSubtitle:
+      'האפליקציה מזקקת את ההעדפות האלה מ"מחשבות לשיפור" שכתבת על שיעורים. אפשר לערוך או למחוק.',
+    learnedEmpty:
+      'עדיין אין מספיק משוב. כתוב "מחשבות לשיפור" על שיעורים כדי שהאפליקציה תלמד.',
+    learnedSave: 'שמור',
+    learnedSaved: 'נשמר',
     aboutLabel: 'אודות',
     versionLabel: 'גרסה',
   },
