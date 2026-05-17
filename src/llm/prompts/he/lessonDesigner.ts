@@ -29,10 +29,10 @@ export type DesignerConstraints = {
   equipmentAvailableHe: string[];
   preferredModel: PedagogicalModel | 'auto';
   specialConsiderationsHe?: string;
-  // Consolidated per-class design profile (classes.design_profile_he), set
-  // when the teacher picked a class in the designer. The accumulated, LLM-
-  // distilled record of what the teacher wants changed for this class.
-  classProfileHe?: string;
+  // The teacher's global design profile (teachers.design_profile_he) — the
+  // LLM-distilled record of their accumulated per-lesson improvement
+  // feedback. designLesson() loads and injects this; callers don't set it.
+  designProfileHe?: string;
 };
 
 export type GeneratedLesson = {
@@ -132,10 +132,10 @@ export function buildUserMessage(constraints: DesignerConstraints, activities: A
   const considerations = constraints.specialConsiderationsHe?.trim()
     ? `\n\nהתחשבויות מיוחדות: ${constraints.specialConsiderationsHe}`
     : '';
-  const profile = constraints.classProfileHe?.trim()
-    ? `\n\n## העדפות שנלמדו עבור הכיתה הזאת
-המורה ציין לאורך זמן את ההעדפות הבאות לגבי שיעורים לכיתה זו. תכנן את השיעור כך שיכבד אותן, כל עוד אינן סותרות את המטרה, הבטיחות או האילוצים:
-${constraints.classProfileHe.trim()}`
+  const profile = constraints.designProfileHe?.trim()
+    ? `\n\n## העדפות שנלמדו ממשובים קודמים
+המורה ציין לאורך זמן את ההעדפות הבאות לגבי השיעורים שהאפליקציה מתכננת. תכנן את השיעור כך שיכבד אותן, כל עוד אינן סותרות את המטרה, הבטיחות או האילוצים:
+${constraints.designProfileHe.trim()}`
     : '';
 
   return `## אילוצי השיעור

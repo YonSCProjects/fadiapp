@@ -1,12 +1,35 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { inArray, isNull, and } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { activities, type Activity, type Class, type Lesson, type LessonBlock } from '@/db/schema';
+import {
+  activities,
+  type Activity,
+  type Class,
+  type DesignFeedback,
+  type Lesson,
+  type LessonBlock,
+} from '@/db/schema';
 import { getLesson, softDeleteLesson, updateLesson } from '@/db/repos/lessons';
 import { listClasses } from '@/db/repos/classes';
 import { createInstance } from '@/db/repos/lessonInstances';
+import {
+  addFeedback,
+  listFeedbackForLesson,
+  softDeleteFeedback,
+} from '@/db/repos/designFeedback';
+import { consolidateProfile } from '@/llm/profileConsolidator';
 import { he } from '@/i18n/he';
 import { useBottomInset } from '@/ui/useBottomInset';
 import { BlockEditModal } from '@/ui/BlockEditModal';
@@ -25,6 +48,10 @@ export default function LessonDetail() {
   const [addOpen, setAddOpen] = useState(false);
   const [classPickerOpen, setClassPickerOpen] = useState(false);
   const [availableClasses, setAvailableClasses] = useState<Class[]>([]);
+  // Improvement-thoughts (the learning loop) state.
+  const [feedback, setFeedback] = useState<DesignFeedback[]>([]);
+  const [newFeedback, setNewFeedback] = useState('');
+  const [consolidating, setConsolidating] = useState(false);
   const bottomPad = useBottomInset();
 
   const loadAll = useCallback(
@@ -44,9 +71,11 @@ export default function LessonDetail() {
             inArray(activities.environment, [row.environment, 'any']),
           ),
         );
+      const fb = await listFeedbackForLesson(id);
       if (!active()) return;
       setWhitelist(rows);
       setLesson(row);
+      setFeedback(fb);
     },
     [id],
   );
@@ -101,6 +130,35 @@ export default function LessonDetail() {
     if (lesson === null || lesson === 'missing') return;
     await updateLesson(lesson.id, { blocks_json: nextBlocks });
     setLesson({ ...lesson, blocks_json: nextBlocks });
+  }
+
+  // After feedback changes, re-distill the teacher's global design profile in
+  // the background. Feedback is already persisted; a failure here only means
+  // "profile not updated yet" — the next feedback retries over everything.
+  async function reconsolidate() {
+    setConsolidating(true);
+    try {
+      await consolidateProfile();
+    } catch {
+      Alert.alert(he.lessons.improveLabel, he.lessons.improveConsolidateFailed);
+    } finally {
+      setConsolidating(false);
+    }
+  }
+
+  async function onAddFeedback() {
+    const text = newFeedback.trim();
+    if (text.length === 0) return;
+    await addFeedback(id, text);
+    setNewFeedback('');
+    setFeedback(await listFeedbackForLesson(id));
+    await reconsolidate();
+  }
+
+  async function onRemoveFeedback(feedbackId: string) {
+    await softDeleteFeedback(feedbackId);
+    setFeedback(await listFeedbackForLesson(id));
+    await reconsolidate();
   }
 
   function onSaveBlock(next: LessonBlock) {
@@ -219,6 +277,53 @@ export default function LessonDetail() {
                 </Text>
               ))}
             </Section>
+          )}
+
+          {/* ---- Improvement thoughts (the learning loop) ---- */}
+          <View style={styles.improveHeader}>
+            <Text style={styles.sectionLabel}>{he.lessons.improveLabel}</Text>
+            {consolidating && (
+              <View style={styles.improveConsolidating}>
+                <ActivityIndicator size="small" color={theme.accent.link} />
+                <Text style={styles.improveConsolidatingText}>
+                  {he.lessons.improveConsolidating}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.improveSubtitle}>{he.lessons.improveSubtitle}</Text>
+
+          <View style={styles.improveRow}>
+            <TextInput
+              value={newFeedback}
+              onChangeText={setNewFeedback}
+              style={styles.improveInput}
+              textAlign="right"
+              placeholder={he.lessons.improvePlaceholder}
+              placeholderTextColor={theme.text.faint}
+              onSubmitEditing={onAddFeedback}
+            />
+            <Pressable style={styles.improveAddBtn} onPress={onAddFeedback}>
+              <Text style={styles.improveAddLabel}>+</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.improvePiiHint}>{he.lessons.improvePiiHint}</Text>
+
+          {feedback.length > 0 && (
+            <View style={styles.improveList}>
+              {feedback.map((f) => (
+                <View key={f.id} style={styles.improveItem}>
+                  <Text style={styles.improveItemText}>{f.text_he}</Text>
+                  <Pressable
+                    onPress={() => onRemoveFeedback(f.id)}
+                    hitSlop={12}
+                    style={styles.improveRemoveBtn}
+                  >
+                    <Text style={styles.improveRemoveLabel}>×</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
           )}
 
           <Pressable style={styles.startBtn} onPress={onStart}>
@@ -381,6 +486,70 @@ const createStyles = (theme: ThemeTokens) =>
       alignItems: 'center',
     },
     deleteLabel: { color: theme.status.danger, fontSize: 16, fontWeight: '600' },
+    improveHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 24,
+    },
+    improveConsolidating: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    improveConsolidatingText: { color: theme.accent.link, fontSize: 12 },
+    improveSubtitle: {
+      color: theme.text.muted,
+      fontSize: 13,
+      lineHeight: 19,
+      marginTop: 6,
+    },
+    improveRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+    improveInput: {
+      flex: 1,
+      backgroundColor: theme.bg.input,
+      color: theme.text.primary,
+      padding: 12,
+      borderRadius: 8,
+      fontSize: 16,
+    },
+    improveAddBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      backgroundColor: theme.accent.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    improveAddLabel: {
+      color: theme.accent.primaryText,
+      fontSize: 24,
+      lineHeight: 26,
+    },
+    improvePiiHint: { color: theme.text.faint, fontSize: 12, marginTop: 6 },
+    improveList: { gap: 8, marginTop: 10 },
+    improveItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: theme.bg.card,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.border.subtle,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+    },
+    improveItemText: {
+      flex: 1,
+      color: theme.text.secondary,
+      fontSize: 14,
+      lineHeight: 20,
+      paddingVertical: 6,
+    },
+    improveRemoveBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    improveRemoveLabel: { color: theme.status.danger, fontSize: 22, lineHeight: 24 },
     fab: {
       position: 'absolute',
       bottom: 32,

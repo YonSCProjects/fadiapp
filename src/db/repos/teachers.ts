@@ -53,6 +53,27 @@ export async function setScoresSheetId(teacherId: string, sheetId: string): Prom
     .where(eq(teachers.id, teacherId));
 }
 
+// Global "design profile" — the LLM-distilled summary of all the teacher's
+// per-lesson improvement feedback. Injected into every designer generation.
+export async function getDesignProfile(): Promise<string | null> {
+  const t = await getCurrentTeacher();
+  return t?.design_profile_he ?? null;
+}
+
+export async function setDesignProfile(
+  teacherId: string,
+  profile: string | null,
+): Promise<void> {
+  await db
+    .update(teachers)
+    .set({
+      design_profile_he: profile,
+      updated_at: new Date(),
+      sync_rev: sql`${teachers.sync_rev} + 1`,
+    })
+    .where(eq(teachers.id, teacherId));
+}
+
 // Default equipment catalog seeded on first read. Teachers edit freely from there.
 export const DEFAULT_EQUIPMENT_CATALOG_HE: string[] = [
   'כדורסל',

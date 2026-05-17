@@ -1,6 +1,6 @@
-// Orchestrates the "app learns" loop: reads a class's raw design feedback,
-// asks the LLM to distill it into a concise profile, and persists the result
-// on classes.design_profile_he.
+// Orchestrates the "app learns" loop: reads every per-lesson improvement-
+// feedback row, asks the LLM to distill them into one concise global design
+// profile, and persists it on teachers.design_profile_he.
 //
 // PII NOTE: feedback `text_he` is teacher-authored free text sent to the LLM
 // verbatim — same outbound free-text path as the designer's
@@ -14,20 +14,22 @@ import {
   CONSOLIDATOR_SYSTEM,
   buildConsolidatorUserMessage,
 } from './prompts/he/profileConsolidator';
-import { getClass, setDesignProfile } from '@/db/repos/classes';
-import { listFeedbackForClass } from '@/db/repos/designFeedback';
+import { getCurrentTeacher, setDesignProfile } from '@/db/repos/teachers';
+import { listAllFeedback } from '@/db/repos/designFeedback';
 
-// Re-consolidates the design profile for a class from all of its feedback.
+// Re-consolidates the teacher's global design profile from all feedback.
 // Returns the new profile text. Throws on LLM/network failure — callers
 // should treat that as "feedback saved, profile not yet updated".
-export async function consolidateProfile(classId: string): Promise<string> {
-  const feedback = await listFeedbackForClass(classId);
+export async function consolidateProfile(): Promise<string> {
+  const teacher = await getCurrentTeacher();
+  if (!teacher) throw new Error('consolidateProfile: no teacher row');
+
+  const feedback = await listAllFeedback();
   if (feedback.length === 0) {
-    await setDesignProfile(classId, null);
+    await setDesignProfile(teacher.id, null);
     return '';
   }
 
-  const cls = await getClass(classId);
   const resp = await callLlm({
     model: 'claude-sonnet-4-6',
     system: [
@@ -41,7 +43,7 @@ export async function consolidateProfile(classId: string): Promise<string> {
       {
         role: 'user',
         content: buildConsolidatorUserMessage(
-          cls?.design_profile_he ?? null,
+          teacher.design_profile_he ?? null,
           feedback.map((f) => f.text_he),
         ),
       },
@@ -50,6 +52,6 @@ export async function consolidateProfile(classId: string): Promise<string> {
   });
 
   const profile = firstText(resp).trim();
-  await setDesignProfile(classId, profile.length > 0 ? profile : null);
+  await setDesignProfile(teacher.id, profile.length > 0 ? profile : null);
   return profile;
 }

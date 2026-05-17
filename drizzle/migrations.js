@@ -7,6 +7,8 @@ import m0002 from './0002_broken_beyonder.sql';
 import m0003 from './0003_mighty_barracuda.sql';
 import m0004 from './0004_robust_mojo.sql';
 import m0005 from './0005_spotty_captain_america.sql';
+import m0006 from './0006_white_ezekiel.sql';
+import m0007 from './0007_perfect_typhoid_mary.sql';
 
   export default {
     journal,
@@ -16,7 +18,9 @@ m0001,
 m0002,
 m0003,
 m0004,
-m0005
+m0005,
+m0006,
+m0007
     }
   }
   

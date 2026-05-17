@@ -44,6 +44,10 @@ export const teachers = sqliteTable('teachers', {
   // Null = use hardcoded defaults; array = explicit catalog/filter.
   equipment_catalog_json: text('equipment_catalog_json', { mode: 'json' }).$type<string[]>(),
   disabled_models_json: text('disabled_models_json', { mode: 'json' }).$type<string[]>(),
+  // Global "design profile" — a short Hebrew preference summary the LLM
+  // distills from the teacher's per-lesson design_feedback. Injected into
+  // every lesson-designer generation. See src/llm/profileConsolidator.ts.
+  design_profile_he: text('design_profile_he'),
   ...timestamps,
 });
 
@@ -60,12 +64,6 @@ export const classes = sqliteTable(
     students_count_cached: integer('students_count_cached').notNull().default(0),
     notes: text('notes'),
     educator_email: text('educator_email'),
-    // Consolidated "design profile" — a short Hebrew preference summary
-    // distilled by the LLM from the teacher's design_feedback rows for this
-    // class. Injected into the lesson-designer prompt when this class is
-    // selected. Null until the teacher gives feedback. See src/llm/
-    // profileConsolidator.ts.
-    design_profile_he: text('design_profile_he'),
     ...timestamps,
   },
   (t) => ({
@@ -74,22 +72,23 @@ export const classes = sqliteTable(
 );
 
 // ---------------------------------------------------------------------------
-// design_feedback — raw teacher feedback on the lessons the app designs for a
-// class ("more games, fewer drills", "warmups run long"). Consolidated by the
-// LLM into classes.design_profile_he. The app "learning" loop.
+// design_feedback — raw "improvement thoughts" the teacher writes on a
+// generated lesson ("more games, fewer drills", "warmup ran long"). All
+// feedback rows across all lessons are consolidated by the LLM into the
+// teacher's single global teachers.design_profile_he. The app "learning" loop.
 // ---------------------------------------------------------------------------
 export const design_feedback = sqliteTable(
   'design_feedback',
   {
     id: idCol(),
-    class_id: text('class_id')
+    lesson_id: text('lesson_id')
       .notNull()
-      .references(() => classes.id),
+      .references(() => lessons.id),
     text_he: text('text_he').notNull(),
     ...timestamps,
   },
   (t) => ({
-    class_idx: index('idx_design_feedback_class').on(t.class_id),
+    lesson_idx: index('idx_design_feedback_lesson').on(t.lesson_id),
   }),
 );
 

@@ -1,7 +1,7 @@
 import { and, inArray, isNull } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { activities, type Activity } from '@/db/schema';
-import { getDisabledModels } from '@/db/repos/teachers';
+import { getDesignProfile, getDisabledModels } from '@/db/repos/teachers';
 import { firstText } from './client';
 import { callLlmStream, type StreamHandlers } from './stream';
 import {
@@ -48,7 +48,13 @@ export async function designLesson(
   // a teacher with a stable preference still benefits from Anthropic's cache.
   const disabledModels = await getDisabledModels();
   const system = buildSystemPrompt({ disabledModels });
-  const userMessage = buildUserMessage(constraints, whitelist);
+  // The teacher's global learned design profile is injected here, not by the
+  // caller — every generation gets it automatically.
+  const designProfileHe = await getDesignProfile();
+  const userMessage = buildUserMessage(
+    { ...constraints, designProfileHe: designProfileHe ?? undefined },
+    whitelist,
+  );
 
   const response = await callLlmStream(
     {

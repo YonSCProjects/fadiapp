@@ -3,27 +3,40 @@ import { db } from '../client';
 import { design_feedback, type DesignFeedback } from '../schema';
 
 export async function addFeedback(
-  classId: string,
+  lessonId: string,
   textHe: string,
 ): Promise<DesignFeedback> {
   const [row] = await db
     .insert(design_feedback)
-    .values({ class_id: classId, text_he: textHe })
+    .values({ lesson_id: lessonId, text_he: textHe })
     .returning();
   return row!;
 }
 
-// Newest first — the consolidator weights recent feedback higher, and the
-// class-detail UI shows the latest entries on top.
-export async function listFeedbackForClass(
-  classId: string,
+// Feedback entered on one specific lesson — shown on that lesson's screen.
+export async function listFeedbackForLesson(
+  lessonId: string,
 ): Promise<DesignFeedback[]> {
   return db
     .select()
     .from(design_feedback)
     .where(
-      and(eq(design_feedback.class_id, classId), isNull(design_feedback.deleted_at)),
+      and(
+        eq(design_feedback.lesson_id, lessonId),
+        isNull(design_feedback.deleted_at),
+      ),
     )
+    .orderBy(desc(design_feedback.created_at));
+}
+
+// Every feedback row across all lessons — the input to the global
+// profile consolidation. Newest first; the consolidator weights recent
+// feedback higher.
+export async function listAllFeedback(): Promise<DesignFeedback[]> {
+  return db
+    .select()
+    .from(design_feedback)
+    .where(isNull(design_feedback.deleted_at))
     .orderBy(desc(design_feedback.created_at));
 }
 
